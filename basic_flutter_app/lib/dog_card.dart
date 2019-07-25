@@ -55,7 +55,7 @@ class DogCardState extends State<DogCard> {
           gradient: new LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.black54, Colors.black, Colors.blueGrey[600]],
+            colors: [Colors.greenAccent, Colors.black, Colors.blueGrey[600]],
           ),
         ),
         alignment: Alignment.center,
@@ -83,19 +83,20 @@ class DogCardState extends State<DogCard> {
         width: 290.0,
         height: 115.0,
         child: new Card(
-          color: Colors.black87,
+          color: Colors.transparent,
           child: new Padding(
             padding: const EdgeInsets.only(
-              top: 8.0,
-              bottom: 8.0,
-              left: 64.0,
+              top: 0,
+              bottom: 0,
+              left: 0,
             ),
             child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                new Text(widget.dog.name,
-                    style: Theme.of(context).textTheme.headline),
+                new Text(
+                    widget.dog.name,
+                    style: Theme.of(context).textTheme.body2),
                 new Text(widget.dog.location,
                     style: Theme.of(context).textTheme.subhead),
                 new Row(
@@ -105,7 +106,9 @@ class DogCardState extends State<DogCard> {
                     ),
                     new Text(': ${widget.dog.rating} / 10')
                   ],
-                )
+                ),
+                new Text(widget.dog.location,
+                    style: Theme.of(context).textTheme.subhead)
               ],
             ),
           ),
@@ -119,7 +122,7 @@ class DogCardState extends State<DogCard> {
     return new InkWell(
       onTap: () => showDogDetailPage(),
       child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         child: new Container(
           height: 115.0,
           child: new Stack(

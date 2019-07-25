@@ -1,15 +1,11 @@
 name: we_rate_dogs
 description: A new Flutter project.
 
-dependencies:
-  flutter:
-    sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.0
+
 
 dev_dependencies:
+
   flutter_test:
     sdk: flutter
 
@@ -28,6 +24,38 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/WhiteRectangle.png
+    - assets/login_logo.png
+    - assets/shoes1.png
+    - assets/drive-steering-wheel.jpg
+    - assets/line.png
+  fonts:
+    - family: WorkSansSemiBold
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-SemiBold.ttf
+
+    - family: WorkSansBold
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-Bold.ttf
+
+    - family: WorkSansMedium
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-Medium.ttf
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/raleway/Raleway-Regular.ttf
+        - asset: assets/fonts/raleway/Raleway-Thin.ttf
+          style: normal
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.2
+  font_awesome_flutter: ^8.0.1
+  flutter_sparkline: "^0.1.0"
+  flutter_staggered_grid_view: "^0.2.7"
+  bottom_navy_bar: ^3.0.0
+  #   liquid_pull_to_refresh: ^1.1.1
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -53,5 +81,5 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
-  # For details regarding fonts from package dependencies, 
+  # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
