@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'collapsing_toolbar/collapsing_profile.dart';
+import 'collapsing_toolbar/collapsing_tab.dart';
 import 'shop_items_page.dart';
 import 'list_page.dart';
 import 'account_page.dart';
@@ -34,6 +36,7 @@ class _MainPageState extends State<MainPage> {
   }
   @override
   void dispose() {
+     super.dispose();
     _pageController.dispose();
   }
 
@@ -337,9 +340,9 @@ class _MainPageState extends State<MainPage> {
   Widget _buildTile(Widget child, {Function() onTap}) {
     return Material(
         elevation: 14.0, //
-        borderRadius: BorderRadius.circular(12.0),
-        shadowColor: Color(0x802196F3),
-        child: InkWell(
+    borderRadius: BorderRadius.circular(12.0),
+    shadowColor: Color(0x802196F3),
+    child: InkWell(
           // Do onTap() if it isn't null, otherwise do print()
             onTap: onTap != null
                 ? () => onTap()
