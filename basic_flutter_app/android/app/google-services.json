@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "400007099443",
+    "firebase_url": "https://micasa-9db7e.firebaseio.com",
+    "project_id": "micasa-9db7e",
+    "storage_bucket": "micasa-9db7e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400007099443:android:2ea29cc4a779d0a7",
+        "android_client_info": {
+          "package_name": "com.design24k.condo.micasa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "400007099443-grr6ahmpi1r5uj02ua5t5uv8qjpmtpme.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIxAt24Dj3Ajd9rFfdBxi7T6CzP16vxwE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

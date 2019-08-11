@@ -1,9 +1,15 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:we_rate_dogs/pages/dashboard/main_page.dart';
+
 import '../style/theme.dart' as Theme;
 import '../utils/bubble_indication_painter.dart';
-import '../pages/main_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -14,6 +20,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
+  final FirebaseMessaging _fcm = FirebaseMessaging();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -26,6 +33,7 @@ class _LoginPageState extends State<LoginPage>
 
   TextEditingController loginEmailController = new TextEditingController();
   TextEditingController loginPasswordController = new TextEditingController();
+  StreamSubscription iosSubscription;
 
   bool _obscureTextLogin = true;
   bool _obscureTextSignup = true;
@@ -53,73 +61,93 @@ class _LoginPageState extends State<LoginPage>
 
         //    191+75 = 266 +70 = 336    775
         child: SingleChildScrollView(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height >= 775.0
-                    ? MediaQuery.of(context).size.height
-                    : 775.0,
-                decoration: new BoxDecoration(
-                  gradient: new LinearGradient(
-                      colors: [
-                        Theme.Colors.loginGradientStart,
-                        Theme.Colors.loginGradientEnd
-                      ],
-                      begin: const FractionalOffset(0.0, 0.0),
-                      end: const FractionalOffset(1.0, 1.0),
-                      stops: [0.0, 1.0],
-                      tileMode: TileMode.clamp),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 75.0),
-                      child: new Image(
-                          width: 250.0,
-                          height: 161.0,
-                          fit: BoxFit.contain,
-                          image: new AssetImage('assets/img/login_logo.png')),
-                    ),
-                    Padding(
-                      // 20 + 50
-                      padding: EdgeInsets.only(top: 20.0),
-                      child: _buildMenuBar(context),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: PageView(
-                        controller: _pageController,
-                        onPageChanged: (i) {
-                          if (i == 0) {
-                            setState(() {
-                              right = Colors.white;
-                              left = Colors.black;
-                            });
-                          } else if (i == 1) {
-                            setState(() {
-                              right = Colors.black;
-                              left = Colors.white;
-                            });
-                          }
-                        },
-                        children: <Widget>[
-                          new ConstrainedBox(
-                            constraints: const BoxConstraints.expand(),
-                            child: _buildSignIn(context),
-                          ),
-                          new ConstrainedBox(
-                            constraints: const BoxConstraints.expand(),
-                            child: _buildSignUp(context),
-                          ),
-                        ],
-                      ),
-                    ),
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height >= 775.0
+                ? MediaQuery.of(context).size.height
+                : 775.0,
+            decoration: new BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Theme.Colors.loginGradientStart,
+                    Theme.Colors.loginGradientEnd
                   ],
-                ),
-              ),
+                  begin: const FractionalOffset(0.0, 0.0),
+                  end: const FractionalOffset(1.0, 1.0),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
             ),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 75.0),
+                  child: new Image(
+                      width: 250.0,
+                      height: 161.0,
+                      fit: BoxFit.contain,
+                      image: new AssetImage('assets/img/login_logo.png')),
+                ),
+                Padding(
+                  // 20 + 50
+                  padding: EdgeInsets.only(top: 20.0),
+                  child: _buildMenuBar(context),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (i) {
+                      if (i == 0) {
+                        setState(() {
+                          right = Colors.white;
+                          left = Colors.black;
+                        });
+                      } else if (i == 1) {
+                        setState(() {
+                          right = Colors.black;
+                          left = Colors.white;
+                        });
+                      }
+                    },
+                    children: <Widget>[
+                      new ConstrainedBox(
+                        constraints: const BoxConstraints.expand(),
+                        child: _buildSignIn(context),
+                      ),
+                      new ConstrainedBox(
+                        constraints: const BoxConstraints.expand(),
+                        child: _buildSignUp(context),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  _saveDeviceToken() async {
+    print("going to save token =");
+//    String uid = 'jeffd23';
+    String fcmToken = await _fcm.getToken();
+    if (fcmToken != null) {
+      print(fcmToken);
+//      var tokens = _db
+//          .collection('users')
+//          .document(uid)
+//          .collection('tokens')
+//          .document(fcmToken);
+//
+//      await tokens.setData({
+//        'token': fcmToken,
+//        'createdAt': FieldValue.serverTimestamp(), // optional
+//        'platform': Platform.operatingSystem // optional
+//      });
+    }
   }
 
   @override
@@ -128,7 +156,33 @@ class _LoginPageState extends State<LoginPage>
     myFocusNodeEmail.dispose();
     myFocusNodeName.dispose();
     _pageController?.dispose();
+    if (iosSubscription != null) iosSubscription.cancel();
     super.dispose();
+  }
+
+  void _showCupertinoDialog(Map<String, dynamic> message) {
+    var dialog = CupertinoAlertDialog(
+      content: Text(
+        "xxccadsdasd",
+        style: TextStyle(fontSize: 20),
+      ),
+      actions: <Widget>[
+        CupertinoButton(
+          child: Text("取消"),
+          onPressed: () {
+//            Navigator.pop(context);
+          },
+        ),
+        CupertinoButton(
+          child: Text("确定"),
+          onPressed: () {
+            //          Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+    print("show dialog");
+    showDialog(context: context, builder: (_) => dialog);
   }
 
   @override
@@ -140,16 +194,36 @@ class _LoginPageState extends State<LoginPage>
       DeviceOrientation.portraitDown,
     ]);
 
+    if (Platform.isIOS) {
+      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
+        print(data);
+        _saveDeviceToken();
+      });
+      _fcm.requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      _saveDeviceToken();
+    }
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+        _showCupertinoDialog(message);
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
     _pageController = PageController();
   }
 
-
-   void goDashurBoard(){
-     print("xxxxxx");
-     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-       return new MainPage();
-     }));
-   }
+  void goDashurBoard() {
+    print("xxxxxx");
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new MainPage();
+    }));
+  }
 
   void showInSnackBar(String value) {
     FocusScope.of(context).requestFocus(new FocusNode());
@@ -344,10 +418,7 @@ class _LoginPageState extends State<LoginPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => {
-                      goDashurBoard()
-                    }
-                ),
+                    onPressed: () => {goDashurBoard()}),
               ),
             ],
           ),
@@ -644,23 +715,14 @@ class _LoginPageState extends State<LoginPage>
                         "SIGN UP",
                         style: TextStyle(
                             color: Colors.white,
-                            fontSize:   18.0,
+                            fontSize: 18.0,
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () =>
-                        showInSnackBar("SignUp button pressed")),
+                    onPressed: () => showInSnackBar("SignUp button pressed")),
               ),
-
-
-
-
             ],
-
-
           ),
-
-
           Padding(
             padding: EdgeInsets.only(top: 10.0),
             child: FlatButton(
@@ -675,7 +737,6 @@ class _LoginPageState extends State<LoginPage>
                 )),
           )
         ],
-
       ),
     );
   }
