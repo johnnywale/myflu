@@ -124,8 +124,8 @@ class _MenuItemWidgetState extends State<_MenuItemWidget>
   void _onRefresh() {
     if (mounted) {
       setState(() {
-        currentTop = 550;
-        currentLeft = 135;
+        currentTop = widget.endTop;
+        currentLeft = widget.endLeft;
         currentWidth = 0;
         currentHeight = 0;
       });

@@ -37,9 +37,14 @@ class _ItemEffect extends State<ItemEffect> with TickerProviderStateMixin {
       duration: widget.duration,
     );
 
-    _offsetFloat = Tween<Offset>(begin: Offset(-1.0, 0.0), end: Offset.zero)
-        .animate(_controller);
-    _opacity = Tween<double>(begin: 0, end: 0.8).animate(_controller);
+    CurvedAnimation curve =
+        new CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+
+    _offsetFloat =
+        Tween<Offset>(begin: Offset(0.0, 1.4), end: Offset.zero).animate(curve);
+
+    _opacity = Tween<double>(begin: 0.5, end: 0.8).animate(curve);
+
     _controller.addListener(() async {
       if (_controller.status == AnimationStatus.completed) {
         if (mounted) {
@@ -52,7 +57,10 @@ class _ItemEffect extends State<ItemEffect> with TickerProviderStateMixin {
   @override
   void dispose() {
     disposed = true;
-    str.cancel();
+    //   if (str!=null){
+    str?.cancel();
+
+    // }
     _controller.dispose();
     super.dispose();
   }
@@ -60,20 +68,21 @@ class _ItemEffect extends State<ItemEffect> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     Widget built = widget.indexedWidgetBuilder(context, widget.position);
-    if (!animated) {
-      var stream = widget.controller.listenAnimation;
-      str = stream.listen((event) {
-        if (mounted) {
-          var isme = (event == widget.position);
-          if (isme) {
-            print("call  ${isme} ${event} second ${widget.position} build");
-            _controller.forward();
-          }
-        }
-      });
-      widget.controller.publish(widget.position);
-    }
+//    if (!animated) {
+//      var stream = widget.controller.listenAnimation;
+//      str = stream.listen((event) {
+//        if (mounted) {
+//          var isme = (event == widget.position);
+//          if (isme) {
+//            print("call  ${isme} ${event} second ${widget.position} build");
+//            _controller.forward();
+//          }
+//        }
+//      });
+//      widget.controller.publish(widget.position);
+//    }
     print("build is call ${widget.position}");
+    _controller.forward();
     return FadeTransition(
         opacity: _opacity,
         child: SlideTransition(

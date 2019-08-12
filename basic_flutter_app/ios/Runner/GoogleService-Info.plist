@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>CLIENT_ID</key>
+        <string>400007099443-2ec904dfr3b7l5jspos468lhr8pp9ape.apps.googleusercontent.com</string>
+        <key>REVERSED_CLIENT_ID</key>
+        <string>com.googleusercontent.apps.400007099443-2ec904dfr3b7l5jspos468lhr8pp9ape</string>
+        <key>API_KEY</key>
+        <string>AIzaSyCmITpW4PMpJIUkJpx1YjmzqWwWcK_CBQg</string>
+        <key>GCM_SENDER_ID</key>
+        <string>400007099443</string>
+        <key>PLIST_VERSION</key>
+        <string>1</string>
+        <key>BUNDLE_ID</key>
+        <string>com.design24k.condo.micasa</string>
+        <key>PROJECT_ID</key>
+        <string>micasa-9db7e</string>
+        <key>STORAGE_BUCKET</key>
+        <string>micasa-9db7e.appspot.com</string>
+        <key>IS_ADS_ENABLED</key>
+        <false></false>
+        <key>IS_ANALYTICS_ENABLED</key>
+        <false></false>
+        <key>IS_APPINVITE_ENABLED</key>
+        <true></true>
+        <key>IS_GCM_ENABLED</key>
+        <true></true>
+        <key>IS_SIGNIN_ENABLED</key>
+        <true></true>
+        <key>GOOGLE_APP_ID</key>
+        <string>1:400007099443:ios:2ea29cc4a779d0a7</string>
+        <key>DATABASE_URL</key>
+        <string>https://micasa-9db7e.firebaseio.com</string>
+    </dict>
+</plist>

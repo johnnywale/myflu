@@ -21,13 +21,14 @@ class _MyHomePageState extends State<MyPlateHomePage> {
   ListAnimationController _animationController;
   RefreshController _refreshController;
   int total = 20;
+  int batch  = 40;
   int count = 0;
   GlobalKey _basketKey = GlobalKey();
 
   @override
   void initState() {
     _controller = ScrollController();
-    _duration = Duration(milliseconds: 500);
+    _duration = Duration(milliseconds: 900);
     _animationController = ListAnimationController();
     _refreshController = RefreshController(initialRefresh: false);
     _controller.addListener(() {});
@@ -241,7 +242,7 @@ class _MyHomePageState extends State<MyPlateHomePage> {
       },
     );
     await Future.delayed(Duration(milliseconds: 300));
-    total = total + 10;
+    total = total + batch;
     _refreshController.loadComplete();
     Navigator.pop(context);
     if (mounted) setState(() {});

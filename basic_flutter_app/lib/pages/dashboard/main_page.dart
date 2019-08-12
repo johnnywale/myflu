@@ -9,11 +9,14 @@ import 'package:we_rate_dogs/drawer/exampleCustomMenu/ExampleCustomMenu.dart';
 import 'package:we_rate_dogs/drawer/exampleHiddenDrawer/example_hidden_drawer.dart';
 import 'package:we_rate_dogs/inner_drawer/inner_drawer.dart';
 import 'package:we_rate_dogs/pages/blurry_artist/ui/artist_details_animator.dart';
+import 'package:we_rate_dogs/pages/buy_ticket/home_page.dart';
 import 'package:we_rate_dogs/pages/car_lesson/list_page.dart';
 import 'package:we_rate_dogs/pages/car_lesson/main_two.dart';
 import 'package:we_rate_dogs/pages/dashboard/account_page.dart';
 import 'package:we_rate_dogs/pages/fruit/main_plate.dart';
+import 'package:we_rate_dogs/pages/personalized_tab_bar/main_app_bar.dart';
 import 'package:we_rate_dogs/pages/shose/shop_items_page.dart';
+import 'package:we_rate_dogs/pages/story/main.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -109,7 +112,6 @@ class _MainPageState extends State<MainPage> {
           );
         });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -245,13 +247,24 @@ class _MainPageState extends State<MainPage> {
                               context: context,
                               items: [
                                 MenuItem(
-                                  title: 'Home',
-                                userInfo: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            ArtistsDetailsAnimator()))
-                               ,image: Icon(
+                                  title: 'Artists',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              ArtistsDetailsAnimator())),
+                                  image: Icon(
                                     Icons.home,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                MenuItem(
+                                  title: 'Bar',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              PersonalizedTabBarPage())),
+                                  image: Icon(
+                                    Icons.message,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -285,15 +298,26 @@ class _MainPageState extends State<MainPage> {
                                       color: Colors.white,
                                     )),
                                 MenuItem(
-                                    title: 'Traffic',
+                                    title: 'Buy Ticket',
                                     userInfo: () => Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (_) =>
-                                                ExampleCustomMenu())),
+                                                BuyTicketHomePage())),
                                     image: Icon(
                                       Icons.traffic,
                                       color: Colors.white,
+                                    )),
+                                MenuItem(
+                                    title: 'Story',
+                                    userInfo: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (_) => MyStoryApp())),
+                                    image: Icon(
+                                      Icons.local_activity,
+                                      color: Colors.white,
                                     ))
+
+                                //MyStoryApp
                               ],
                             );
                             Rect rec =
