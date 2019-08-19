@@ -26,10 +26,7 @@ class _DetailsPageState extends State<DetailsPage> {
   void initState() {
     _scrollController = ScrollController();
     _scrollController.addListener(() {
-      var size = (MediaQuery
-          .of(context)
-          .size
-          .width / 5 * 3 + 100) / 2;
+      var size = (MediaQuery.of(context).size.width / 5 * 3 + 100) / 2;
       if (mounted) {
         setState(() {
           if (_scrollController.offset > size) {
@@ -133,10 +130,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Widget _buildDetail() {
     return Container(
-      height: MediaQuery
-          .of(context)
-          .size
-          .height - 70,
+      height: MediaQuery.of(context).size.height - 70,
       color: Colors.white,
       padding: EdgeInsets.all(30),
       child: Column(
@@ -227,10 +221,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    diameter = MediaQuery
-        .of(context)
-        .size
-        .width / 5 * 3;
+    diameter = MediaQuery.of(context).size.width / 5 * 3;
     var textHeight = 44;
     print("diameter is $diameter");
     double totalHeight = diameter + textHeight;
@@ -239,9 +230,7 @@ class _DetailsPageState extends State<DetailsPage> {
     double bottom = textHeight - 20 + diameter / 2;
     print("top is $top , bottom is $bottom");
 
-    EdgeInsets padding = MediaQuery
-        .of(context)
-        .padding;
+    EdgeInsets padding = MediaQuery.of(context).padding;
 
 //          var   safeTop = math.max(top ? padding.top : 0.0, minimum.top),
 
@@ -270,8 +259,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     title: Container(
                         padding: EdgeInsets.only(left: 10),
                         child: Text(widget.foodName,
-                            style: TextStyle(fontSize: 12, color: titleColor))
-                    ),
+                            style: TextStyle(fontSize: 12, color: titleColor))),
 //                    titlePadding: EdgeInsets.all(0.0),
                     centerTitle: false,
                     background: Container(
@@ -282,33 +270,33 @@ class _DetailsPageState extends State<DetailsPage> {
                         children: <Widget>[
                           Container(
                               child: Column(
-                                children: <Widget>[
-                                  SafeArea(
-                                    child: new LayoutBuilder(builder:
-                                        (BuildContext context,
+                            children: <Widget>[
+                              SafeArea(
+                                child: new LayoutBuilder(builder:
+                                    (BuildContext context,
                                         BoxConstraints constraints) {
-                                      // constraints variable has the size info
-                                      return Container();
-                                    }),
-                                  ),
-                                  Container(
-                                      height: top,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(45.0),
-                                            topRight: Radius.circular(45.0),
-                                          ),
-                                          color: Colors.transparent)),
-                                  Container(
-                                      height: bottom,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(45.0),
-                                            topRight: Radius.circular(45.0),
-                                          ),
-                                          color: Colors.white))
-                                ],
-                              )),
+                                  // constraints variable has the size info
+                                  return Container();
+                                }),
+                              ),
+                              Container(
+                                  height: top,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(45.0),
+                                        topRight: Radius.circular(45.0),
+                                      ),
+                                      color: Colors.transparent)),
+                              Container(
+                                  height: bottom,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(45.0),
+                                        topRight: Radius.circular(45.0),
+                                      ),
+                                      color: Colors.white))
+                            ],
+                          )),
                           _buildHeroImage()
                         ],
                       ),
@@ -346,7 +334,7 @@ class _DetailsPageState extends State<DetailsPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
               color:
-              cardTitle == selectedCard ? Color(0xFF7A9BEE) : Colors.white,
+                  cardTitle == selectedCard ? Color(0xFF7A9BEE) : Colors.white,
               border: Border.all(
                   color: cardTitle == selectedCard
                       ? Colors.transparent
@@ -417,8 +405,8 @@ class _FruitAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 151;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset,
-      bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new Container(
       child: child,
       color: Colors.white,

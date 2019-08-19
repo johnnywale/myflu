@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +14,7 @@ class MyPageController extends ScrollController {
     this.keepPage = true,
     this.scrollable = true,
     this.viewportFraction = 1.0,
+    this.leadingOffset = -1,
   })  : assert(initialPage != null),
         assert(keepPage != null),
         assert(viewportFraction != null),
@@ -22,6 +24,7 @@ class MyPageController extends ScrollController {
   final bool scrollable;
   final bool keepPage;
   final double viewportFraction;
+  final double leadingOffset;
 
   double get page {
     assert(
@@ -137,6 +140,7 @@ class _PagePosition extends ScrollPositionWithSingleContext
     ScrollPhysics physics,
     ScrollContext context,
     this.initialPage = 0,
+    this.initialOffset = 0.0,
     bool keepPage = true,
     double viewportFraction = 1.0,
     ScrollPosition oldPosition,
@@ -156,6 +160,7 @@ class _PagePosition extends ScrollPositionWithSingleContext
 
   final int initialPage;
   double _pageToUseOnStartup;
+  double initialOffset;
   bool isInitialPixelsValueSet = false;
 
   @override
@@ -180,15 +185,17 @@ class _PagePosition extends ScrollPositionWithSingleContext
   double getPageFromPixels(double pixels, double viewportDimension) {
     final double actual = math.max(0.0, pixels) /
         math.max(1.0, viewportDimension * viewportFraction);
+
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
-      return round;
+      return round - initialOffset;
     }
-    return actual;
+    return actual - initialOffset;
   }
 
   double getPixelsFromPage(double page) {
-    return page * viewportDimension * viewportFraction;
+    return initialOffset * viewportDimension * viewportFraction +
+        page * viewportDimension * viewportFraction;
   }
 
   @override
@@ -256,36 +263,41 @@ class _PagePosition extends ScrollPositionWithSingleContext
   }
 }
 
-/// Scroll physics used by a [PageView].
-///
-/// These physics cause the page view to snap to page boundaries.
-///
-/// See also:
-///
-///  * [ScrollPhysics], the base class which defines the API for scrolling
-///    physics.
-///  * [PageView.physics], which can override the physics used by a page view.
 class MyPageScrollPhysics extends ScrollPhysics {
-  /// Creates physics for a [PageView].
   const MyPageScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
 
   @override
-  PageScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return PageScrollPhysics(parent: buildParent(ancestor));
+  MyPageScrollPhysics applyTo(ScrollPhysics ancestor) {
+    print("apply ==");
+    return MyPageScrollPhysics(parent: buildParent(ancestor));
   }
 
   double _getPage(ScrollPosition position) {
-    if (position is _PagePosition) return position.page;
-    return position.pixels / position.viewportDimension;
+    print("_getPage ==");
+
+    if (position is _PagePosition) {
+      return position.page;
+    } else {
+      print(" === not a page position ====");
+
+      return position.pixels / position.viewportDimension;
+    }
+    ;
   }
 
   double _getPixels(ScrollPosition position, double page) {
-    if (position is _PagePosition) return position.getPixelsFromPage(page);
-    return page * position.viewportDimension;
+    print("_getPixels ==");
+    if (position is _PagePosition) {
+      return position.getPixelsFromPage(page);
+    } else {
+      print(" === not a page position ====");
+      return page * position.viewportDimension;
+    }
   }
 
   double _getTargetPixels(
       ScrollPosition position, Tolerance tolerance, double velocity) {
+    print("_getTargetPixels ==");
     double page = _getPage(position);
     if (velocity < -tolerance.velocity)
       page -= 0.5;
@@ -296,6 +308,7 @@ class MyPageScrollPhysics extends ScrollPhysics {
   @override
   Simulation createBallisticSimulation(
       ScrollMetrics position, double velocity) {
+    print("creating......");
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
@@ -303,6 +316,7 @@ class MyPageScrollPhysics extends ScrollPhysics {
       return super.createBallisticSimulation(position, velocity);
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
+    print("target is $target");
     if (target != position.pixels)
       return ScrollSpringSimulation(spring, position.pixels, target, velocity,
           tolerance: tolerance);
@@ -496,11 +510,10 @@ class _PageViewState extends State<MyPageView> {
     final ScrollPhysics physics = widget.pageSnapping
         ? _kPagePhysics.applyTo(widget.physics)
         : widget.physics;
+    print("using $physics");
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        print("====|||===");
-
         if (notification.depth == 0 &&
             widget.onPageChanged != null &&
             notification is ScrollUpdateNotification) {
@@ -513,24 +526,30 @@ class _PageViewState extends State<MyPageView> {
         }
         return false;
       },
-      child: Scrollable(
-        dragStartBehavior: widget.dragStartBehavior,
-        axisDirection: axisDirection,
-        controller: widget.controller,
-        physics: physics,
-        viewportBuilder: (BuildContext context, ViewportOffset position) {
-          return Viewport(
-            cacheExtent: 0.0,
-            axisDirection: axisDirection,
-            offset: position,
-            slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate,
-              ),
-            ],
-          );
-        },
+      child: Container(
+        child: Scrollable(
+          dragStartBehavior: widget.dragStartBehavior,
+          axisDirection: axisDirection,
+          controller: widget.controller,
+          physics: physics,
+          viewportBuilder: (BuildContext context, ViewportOffset position) {
+            print(
+                "position is $position , offset is ${widget.controller.leadingOffset}");
+
+            return Viewport(
+              cacheExtent: 0.0,
+              axisDirection: axisDirection,
+              offset: position,
+              slivers: <Widget>[
+                MySliverFillViewport(
+                  leadingOffset: widget.controller.leadingOffset,
+                  viewportFraction: widget.controller.viewportFraction,
+                  delegate: widget.childrenDelegate,
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -550,5 +569,200 @@ class _PageViewState extends State<MyPageView> {
         showName: false));
     description.add(FlagProperty('pageSnapping',
         value: widget.pageSnapping, ifFalse: 'snapping disabled'));
+  }
+}
+
+class MySliverFillViewport extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver whose box children that each fill the viewport.
+  const MySliverFillViewport({
+    Key key,
+    @required SliverChildDelegate delegate,
+    this.leadingOffset = -1.0,
+    this.viewportFraction = 1.0,
+  })  : assert(viewportFraction != null),
+        assert(viewportFraction > 0.0),
+        super(key: key, delegate: delegate);
+
+  /// The fraction of the viewport that each child should fill in the main axis.
+  ///
+  /// If this fraction is less than 1.0, more than one child will be visible at
+  /// once. If this fraction is greater than 1.0, each child will be larger than
+  /// the viewport in the main axis.
+  final double viewportFraction;
+  final double leadingOffset;
+
+  @override
+  MyRenderSliverFillViewport createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context;
+    return MyRenderSliverFillViewport(
+        childManager: element,
+        viewportFraction: viewportFraction,
+        leadingOffset: leadingOffset);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, MyRenderSliverFillViewport renderObject) {
+    renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class MyRenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
+  /// Creates a sliver that contains multiple box children that each fill the
+  /// viewport.
+  ///
+  /// The [childManager] argument must not be null.
+  MyRenderSliverFillViewport({
+    @required RenderSliverBoxChildManager childManager,
+    double viewportFraction = 1.0,
+    double leadingOffset = -1,
+  })  : assert(viewportFraction != null),
+        assert(viewportFraction > 0.0),
+        _viewportFraction = viewportFraction,
+        _leadingOffset = leadingOffset,
+        super(childManager: childManager);
+
+  @override
+  double get itemExtent =>
+      constraints.viewportMainAxisExtent * viewportFraction;
+
+  /// The fraction of the viewport that each child should fill in the main axis.
+  ///
+  /// If this fraction is less than 1.0, more than one child will be visible at
+  /// once. If this fraction is greater than 1.0, each child will be larger than
+  /// the viewport in the main axis.
+  double get viewportFraction => _viewportFraction;
+  double _viewportFraction;
+  double _leadingOffset;
+
+  set viewportFraction(double value) {
+    assert(value != null);
+    if (_viewportFraction == value) return;
+    _viewportFraction = value;
+    markNeedsLayout();
+  }
+
+  double get _padding =>
+      (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
+
+  double getLeadingOffset() {
+    if (_leadingOffset > 0) {
+      return _leadingOffset;
+    } else {
+      return _padding;
+    }
+  }
+
+  @override
+  double indexToLayoutOffset(double itemExtent, int index) {
+    return getLeadingOffset() + super.indexToLayoutOffset(itemExtent, index);
+  }
+
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMinChildIndexForScrollOffset(
+        math.max(scrollOffset - getLeadingOffset(), 0.0), itemExtent);
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    return super.getMaxChildIndexForScrollOffset(
+        math.max(scrollOffset - getLeadingOffset(), 0.0), itemExtent);
+  }
+
+  @override
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  }) {
+    final double padding = _padding;
+
+    if (_leadingOffset > 0) {
+      return childManager.estimateMaxScrollOffset(
+            constraints,
+            firstIndex: firstIndex,
+            lastIndex: lastIndex,
+            leadingScrollOffset: leadingScrollOffset - _leadingOffset,
+            trailingScrollOffset:
+                trailingScrollOffset + padding * 2 - _leadingOffset,
+          ) +
+          padding +
+          padding;
+    } else {
+      return childManager.estimateMaxScrollOffset(
+            constraints,
+            firstIndex: firstIndex,
+            lastIndex: lastIndex,
+            leadingScrollOffset: leadingScrollOffset - padding,
+            trailingScrollOffset: trailingScrollOffset + padding,
+          ) +
+          padding +
+          padding;
+    }
+  }
+}
+
+/// A sliver that contains a single box child that fills the remaining space in
+/// the viewport.
+///
+/// [RenderSliverFillRemaining] sizes its child to fill the viewport in the
+/// cross axis and to fill the remaining space in the viewport in the main axis.
+///
+/// Typically this will be the last sliver in a viewport, since (by definition)
+/// there is never any room for anything beyond this sliver.
+///
+/// See also:
+///
+///  * [RenderSliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [RenderSliverList], which shows a list of variable-sized children in a
+///    viewport.
+class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
+  /// Creates a [RenderSliver] that wraps a [RenderBox] which is sized to fit
+  /// the remaining space in the viewport.
+  RenderSliverFillRemaining({
+    RenderBox child,
+    this.hasScrollBody = true,
+  })  : assert(hasScrollBody != null),
+        super(child: child);
+
+  /// Whether the child has a scrollable body, this value cannot be null.
+  ///
+  /// Defaults to true such that the child will extend beyond the viewport and
+  /// scroll, as seen in [NestedScrollView].
+  ///
+  /// Setting this value to false will allow the child to fill the remainder of
+  /// the viewport and not extend further.
+  bool hasScrollBody;
+
+  @override
+  void performLayout() {
+    final double extent = constraints.remainingPaintExtent -
+        math.min(constraints.overlap, 0.0)
+        // Adding the offset for when this SliverFillRemaining is not scrollable,
+        // so it will stretch to fill on overscroll.
+        +
+        (hasScrollBody ? 0.0 : constraints.scrollOffset);
+    if (child != null)
+      child.layout(
+          constraints.asBoxConstraints(minExtent: extent, maxExtent: extent),
+          parentUsesSize: true);
+    final double paintedChildSize =
+        calculatePaintOffset(constraints, from: 0.0, to: extent);
+    assert(paintedChildSize.isFinite);
+    assert(paintedChildSize >= 0.0);
+    geometry = SliverGeometry(
+      // 0.0 can be applied here for cases when there is not scroll body since
+      // SliverFillRemaining will not have any slivers following it.
+      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : 0.0,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: paintedChildSize,
+      hasVisualOverflow: extent > constraints.remainingPaintExtent ||
+          constraints.scrollOffset > 0.0,
+    );
+    if (child != null) setChildParentData(child, constraints, geometry);
   }
 }

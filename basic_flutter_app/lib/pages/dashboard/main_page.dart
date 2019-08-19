@@ -13,7 +13,9 @@ import 'package:we_rate_dogs/pages/buy_ticket/home_page.dart';
 import 'package:we_rate_dogs/pages/car_lesson/list_page.dart';
 import 'package:we_rate_dogs/pages/car_lesson/main_two.dart';
 import 'package:we_rate_dogs/pages/dashboard/account_page.dart';
+import 'package:we_rate_dogs/pages/food_app/food_app.dart';
 import 'package:we_rate_dogs/pages/fruit/main_plate.dart';
+import 'package:we_rate_dogs/pages/meeting/meeting_one.dart';
 import 'package:we_rate_dogs/pages/personalized_tab_bar/main_app_bar.dart';
 import 'package:we_rate_dogs/pages/shose/shop_items_page.dart';
 import 'package:we_rate_dogs/pages/story/main.dart';
@@ -247,6 +249,17 @@ class _MainPageState extends State<MainPage> {
                               context: context,
                               items: [
                                 MenuItem(
+                                  title: 'Meeting',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) => MeetingOnePage())),
+                                  image: Icon(
+                                    Icons.alarm,
+                                    color: Colors.white,
+                                  ),
+                                ),
+
+                                MenuItem(
                                   title: 'Artists',
                                   userInfo: () => Navigator.of(context).push(
                                       MaterialPageRoute(
@@ -312,6 +325,15 @@ class _MainPageState extends State<MainPage> {
                                     userInfo: () => Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (_) => MyStoryApp())),
+                                    image: Icon(
+                                      Icons.local_activity,
+                                      color: Colors.white,
+                                    )),
+                                MenuItem(
+                                    title: 'Food App',
+                                    userInfo: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (_) => FoodAppPage())),
                                     image: Icon(
                                       Icons.local_activity,
                                       color: Colors.white,

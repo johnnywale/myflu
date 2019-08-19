@@ -1,10 +1,10 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:we_rate_dogs/pages/blurry_artist/data/models.dart';
 import 'package:we_rate_dogs/pages/blurry_artist/ui/artist_details_enter_animation.dart';
 import 'package:we_rate_dogs/pages/blurry_artist/ui/video_card.dart';
-import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 class ArtistDetailsPage extends StatelessWidget {
   ArtistDetailsPage({
@@ -33,19 +33,19 @@ class ArtistDetailsPage extends StatelessWidget {
           ),
           child: new Container(
             color: Colors.black.withOpacity(0.5),
-            child: _buildContent(),
+            child: _buildContent(context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return new SingleChildScrollView(
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _buildAvatar(),
+          _buildAvatar(context),
           _buildInfo(),
           _buildVideoScroller(),
         ],
@@ -53,10 +53,7 @@ class ArtistDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
-
-
-
+  Widget _buildAvatar(BuildContext context) {
     return new Transform(
       transform: new Matrix4.diagonal3Values(
         animation.avatarSize.value,
@@ -64,17 +61,22 @@ class ArtistDetailsPage extends StatelessWidget {
         1.0,
       ),
       alignment: Alignment.center,
-      child: new Container(
-        width: 110.0,
-        height: 110.0,
-        decoration: new BoxDecoration(
-          shape: BoxShape.circle,
-          border: new Border.all(color: Colors.white30),
-        ),
-        margin: const EdgeInsets.only(top: 32.0, left: 16.0),
-        padding: const EdgeInsets.all(3.0),
-        child: new ClipOval(
-          child: new Image.asset(artist.avatar),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: new Container(
+          width: 110.0,
+          height: 110.0,
+          decoration: new BoxDecoration(
+            shape: BoxShape.circle,
+            border: new Border.all(color: Colors.white30),
+          ),
+          margin: const EdgeInsets.only(top: 32.0, left: 16.0),
+          padding: const EdgeInsets.all(3.0),
+          child: new ClipOval(
+            child: new Image.asset(artist.avatar),
+          ),
         ),
       ),
     );

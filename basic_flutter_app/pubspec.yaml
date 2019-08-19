@@ -34,8 +34,8 @@ flutter:
     - assets/blurry_artist/
     - assets/buy_ticket/
     - assets/story/
-
-
+    - assets/meeting/
+    - assets/food_app/
 
 
   fonts:

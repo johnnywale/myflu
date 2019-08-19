@@ -39,7 +39,7 @@ class _MyAppState extends State<MyStoryApp> {
           ],
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
-              tileMode: TileMode.clamp)),
+              tileMode: TileMode.clamp )),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SingleChildScrollView(
@@ -128,7 +128,11 @@ class _MyAppState extends State<MyStoryApp> {
                       controller: controller,
                       reverse: true,
                       itemBuilder: (context, index) {
-                        return Container();
+                        return Container(
+                           color: Colors.pink.withOpacity(0.8),
+                            child: Text("${index}"),
+
+                        );
                       },
                     ),
                   )

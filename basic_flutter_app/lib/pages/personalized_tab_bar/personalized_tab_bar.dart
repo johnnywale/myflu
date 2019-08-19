@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:we_rate_dogs/pages/personalized_tab_bar/dash_box_decoration.dart';
 import 'package:we_rate_dogs/pages/personalized_tab_bar/tab_item.dart';
 
-import 'icon_target.dart';
-
-typedef ItemCallback = List<TabItem> Function();
+import 'tab_drag_and_drop.dart';
 
 class PersonalizedTabController extends ChangeNotifier {
-  PersonalizedTabController();
+  List<TabItem> tabBarItem;
+  List<TabItem> menuItems;
+
+  PersonalizedTabController({
+    this.tabBarItem,
+    this.menuItems,
+  });
 }
 
 class PersonalizedTab extends StatefulWidget {
@@ -15,23 +18,18 @@ class PersonalizedTab extends StatefulWidget {
   final double barRadius;
   final double menuHeight;
   final PersonalizedTabController controller;
-  final List<TabItem> selectedItem;
-  final List<TabItem> notSelectedItem;
 
-  PersonalizedTab(
-      {Key key,
-      barHeight,
-      barRadius,
-      menuHeight,
-      controller,
-      selectedItem,
-      notSelectedItem})
+  final Map<int, TabItem> selected;
+  final Map<int, TabItem> waiting;
+
+  PersonalizedTab({Key key, barHeight, barRadius, menuHeight, controller})
       : this.barHeight = barHeight ?? 90,
         this.barRadius = barRadius ?? 25,
         this.menuHeight = menuHeight ?? 270,
-        this.controller = controller ?? PersonalizedTabController(),
-        this.selectedItem = selectedItem ?? [],
-        this.notSelectedItem = notSelectedItem ?? [],
+        assert(controller != null),
+        this.controller = controller,
+        this.selected = Map.of(controller.tabBarItem.asMap()),
+        this.waiting = Map.of(controller.menuItems.asMap()),
         super(key: key);
 
   @override
@@ -44,77 +42,73 @@ class PersonalizedTabState extends State<PersonalizedTab>
   Color background = Color.fromARGB(255, 254, 212, 0);
   Color tabColor = Color.fromARGB(255, 255, 249, 222);
   double left = 0;
-  AnimationController animationControllerExplore;
+  AnimationController animationController;
   double backGroundHeight;
-
-  double offsetExplore = 0;
+  double offsetMenu = 0;
   bool open = false;
   double configBtnWidth = 100;
   double leftPadding = 25.0;
   double topPadding = 25.0;
   double percentage = 0;
 
+  Map<int, TabItem> pending;
+
   @override
   void initState() {
-    animationControllerExplore = AnimationController(vsync: this);
+    animationController = AnimationController(vsync: this);
     super.initState();
   }
 
   void animateBar(bool open) {
-    if (!animationControllerExplore.isAnimating) {
-      animationControllerExplore.dispose();
-      animationControllerExplore = AnimationController(
+    if (!animationController.isAnimating) {
+      animationController.dispose();
+      animationController = AnimationController(
           duration: Duration(milliseconds: 300), vsync: this);
-      CurvedAnimation curve = CurvedAnimation(
-          parent: animationControllerExplore, curve: Curves.ease);
+      CurvedAnimation curve =
+          CurvedAnimation(parent: animationController, curve: Curves.ease);
       var animation =
-          Tween(begin: offsetExplore, end: open ? -1 * configBtnWidth : 0.0)
+          Tween(begin: offsetMenu, end: open ? -1 * configBtnWidth : 0.0)
               .animate(curve);
-      animationControllerExplore.addListener(() {
+      animationController.addListener(() {
         setState(() {
-          offsetExplore = animation.value.toDouble();
-          percentage = offsetExplore / configBtnWidth * -1;
+          offsetMenu = animation.value.toDouble();
+          percentage = offsetMenu / configBtnWidth * -1;
           backGroundHeight = widget.barHeight +
               (percentage * (widget.menuHeight - widget.barHeight));
         });
       });
-      animationControllerExplore.forward();
+      animationController.forward();
     }
   }
 
-  Widget icons() {
+  Widget menus() {
     return Positioned(
-      // icons
       top: backGroundHeight - tabHeight,
       height: tabHeight,
       width: MediaQuery.of(context).size.width,
-      left: offsetExplore,
+      left: offsetMenu,
       child: GestureDetector(
           onHorizontalDragUpdate: (e) {
-            offsetExplore += e.delta.dx;
-            if (offsetExplore < -configBtnWidth - 20) {
-              offsetExplore = -configBtnWidth - 20;
-            } else if (offsetExplore > 0) {
-              offsetExplore = 0;
+            offsetMenu += e.delta.dx;
+            if (offsetMenu < -configBtnWidth - 20) {
+              offsetMenu = -configBtnWidth - 20;
+            } else if (offsetMenu > 0) {
+              offsetMenu = 0;
             }
-
-            if (offsetExplore == 0) {
+            if (offsetMenu == 0) {
               backGroundHeight = widget.barHeight;
             } else {
-              percentage = offsetExplore / configBtnWidth * -1;
+              percentage = offsetMenu / configBtnWidth * -1;
               backGroundHeight = widget.barHeight +
                   (percentage * (widget.menuHeight - widget.barHeight));
             }
             setState(() {});
           },
-          onHorizontalDragCancel: () {
-            print("cancel");
-          },
           onPanDown: (e) {
-            animationControllerExplore?.stop();
+            animationController?.stop();
           },
           onHorizontalDragEnd: (e) {
-            if (offsetExplore > -50) {
+            if (offsetMenu > -50) {
               animateBar(false);
             } else {
               animateBar(true);
@@ -135,68 +129,54 @@ class PersonalizedTabState extends State<PersonalizedTab>
     );
   }
 
+  void updateTab(int index, TabItem item) {
+    if (pending == null) {
+      pending = Map.of(widget.selected);
+    }
+    pending[index] = item;
+  }
+
   List<Widget> buildSelected() {
     if (backGroundHeight > tabHeight) {
-      return widget.selectedItem
-          .map((a) => IconTarget(data: a.data, size: 40))
+      List<Widget> result = widget.selected
+          .map((index, a) => MapEntry(index, buildIconTarget(index, a)))
+          .values
           .toList(growable: true)
-            ..add(IconTarget(size: 40));
+            ..insert(0, Container(width: configBtnWidth * percentage));
+      for (var i = widget.selected.length; i < 5; i++) {
+        result.add(new IconTarget(
+          sequence: i,
+          size: 40,
+          acceptCallback: updateTab,
+        ));
+      }
+      return result;
     } else {
-      return widget.selectedItem.map((a) => Icon(a.data, size: 40)).toList();
+      return widget.selected.values.map((a) => Icon(a.data, size: 40)).toList();
     }
   }
 
-  List<Widget> buildNotSelected() {
-    return widget.notSelectedItem.map((a) => getChoose(a)).toList();
+  Widget buildIconTarget(int index, TabItem item) {
+    return IconTarget(
+        acceptCallback: updateTab,
+        sequence: index,
+        tabItem: item,
+        size: item.size);
   }
 
-  Widget getChoose(TabItem tabItem) {
-    return Padding(
-        padding: EdgeInsets.only(left: 20),
-        child: LongPressDraggable(
-            data: tabItem,
-            hapticFeedbackOnStart: false,
-            child: Container(
-                decoration: DashBoxDecoration(
-                  color: tabColor,
-                  dashBorder: new Border(
-                    top: new BorderSide(width: 0.5, color: Colors.grey),
-                    bottom: new BorderSide(width: 0.5, color: Colors.grey),
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                width: 80,
-                height: 80,
-                child: Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(tabItem.data, size: 30),
-                      Text(tabItem.text, style: TextStyle(fontSize: 16))
-                    ],
-                  ),
-                )),
-            feedback: Container(
-                decoration: DashBoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                width: 70,
-                height: 70,
-                child: Center(
-                  child: Icon(
-                    tabItem.data,
-                    size: 60,
-                    color: background,
-                  ),
-                )),
-            childWhenDragging: Container(
-              width: 20,
-              color: Colors.red,
-            ),
-            onDragCompleted: () {}));
+  List<Widget> buildNotSelected() {
+    return widget.waiting
+        .map((index, a) => MapEntry(index, getChoose(index, a)))
+        .values
+        .toList();
+  }
+
+  Widget getChoose(int sequence, TabItem tabItem) {
+    return WaitingItem(
+      sequence: sequence,
+      tabItem: tabItem,
+      acceptCallback: (index, item) {},
+    );
   }
 
   Widget getMenuDescription() {
@@ -239,6 +219,13 @@ class PersonalizedTabState extends State<PersonalizedTab>
                           borderRadius:
                               BorderRadius.circular(20.0 * percentage)),
                       onPressed: () {
+                        if (pending != null) {
+                          widget.selected.clear();
+                          widget.selected.addAll(pending);
+                          widget.controller.tabBarItem =
+                              widget.selected.values.toList(growable: false);
+                          widget.controller.notifyListeners();
+                        }
                         animateBar(false);
                       },
                       child: new Text("Done",
@@ -279,7 +266,7 @@ class PersonalizedTabState extends State<PersonalizedTab>
                                 child: Column(children: [
                                   getMenuDescription(),
                                   (backGroundHeight - tabHeight - topPadding <
-                                          105)
+                                          120)
                                       ? Container()
                                       : Container(
                                           height: percentage > 1
@@ -295,13 +282,7 @@ class PersonalizedTabState extends State<PersonalizedTab>
                                             scrollDirection: Axis.horizontal,
                                             children: buildNotSelected(),
                                           )),
-                                  Expanded(
-                                      child: Container(
-//                                        width:
-//                                            MediaQuery.of(context).size.width -
-//                                                45,
-//                                        color: Colors.white,
-                                          )),
+                                  Expanded(child: Container()),
                                 ])),
                           ),
                           GestureDetector(
@@ -314,6 +295,7 @@ class PersonalizedTabState extends State<PersonalizedTab>
                                 child: Center(
                                   child: IconButton(
                                     onPressed: () {
+                                      this.pending = null;
                                       animateBar(false);
                                     },
                                     icon: Icon(Icons.close,
@@ -332,7 +314,7 @@ class PersonalizedTabState extends State<PersonalizedTab>
                       borderRadius: BorderRadius.vertical(
                           top: Radius.circular(widget.barRadius)))),
             ),
-            icons()
+            menus()
           ],
         ));
   }
