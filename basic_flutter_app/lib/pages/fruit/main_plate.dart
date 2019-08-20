@@ -21,7 +21,7 @@ class _MyHomePageState extends State<MyPlateHomePage> {
   ListAnimationController _animationController;
   RefreshController _refreshController;
   int total = 20;
-  int batch  = 40;
+  int batch = 40;
   int count = 0;
   GlobalKey _basketKey = GlobalKey();
 

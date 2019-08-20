@@ -1,0 +1,112 @@
+import 'package:flutter/material.dart';
+
+class CondoLoginPage extends StatefulWidget {
+  @override
+  CondoLoginState createState() => CondoLoginState();
+}
+
+class CondoLoginState extends State<CondoLoginPage> {
+  var _scaffoldKey = new GlobalKey<ScaffoldState>();
+  bool selected = false;
+  FocusNode myFocusNode;
+  Color color = Color(0xffeb8d37);
+
+  @override
+  void initState() {
+    super.initState();
+
+    myFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    myFocusNode.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      body: GestureDetector(
+        onTap: () {
+          myFocusNode.unfocus();
+        },
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(color: Color(0xfff9f7ea)),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30),
+            child: Center(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  child: Image.asset("assets/condo/mi-casa.jpg"),
+                ),
+                TextFormField(
+                  cursorColor: color,
+                  textDirection: TextDirection.ltr,
+                  decoration: InputDecoration(
+                    disabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.purpleAccent,
+                            width: 1,
+                            style: BorderStyle.solid),
+                        borderRadius: BorderRadius.all(Radius.circular(2))),
+                    hintStyle: TextStyle(
+                        color: Colors.purpleAccent,
+                        backgroundColor: Colors.green),
+//                    enabled: false,
+
+                    contentPadding: EdgeInsets.only(top: 40, left: 40),
+
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: color, width: 1, style: BorderStyle.solid),
+                        borderRadius: BorderRadius.all(Radius.circular(2))),
+
+                    border: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.pink,
+                            width: 1,
+                            style: BorderStyle.solid),
+                        borderRadius: BorderRadius.all(Radius.circular(2))),
+
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                          color: color, width: 4, style: BorderStyle.solid),
+                      //    borderRadius: BorderRadius.all(Radius.circular(30))
+                    ),
+                    fillColor: Colors.pink,
+                    focusColor: Colors.pink,
+                    hoverColor: Colors.pink,
+                    labelStyle: TextStyle(
+                      color: color,
+                      decorationColor: Colors.grey,
+                      //     backgroundColor: Colors.purpleAccent,
+                      decorationStyle: TextDecorationStyle.double,
+                    ),
+                    labelText: 'Username',
+                    //    prefixStyle: TextStyle(color: Colors.grey)
+                  ),
+                ),
+                TextFormField(
+                  style: TextStyle(
+                    color: Colors.grey,
+                    decorationColor: Colors.pink,
+                  ),
+                  decoration: InputDecoration(labelText: 'Password'),
+                )
+              ],
+            )),
+          ),
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+    );
+  }
+}

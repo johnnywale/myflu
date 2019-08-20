@@ -1,236 +1,345 @@
 import 'package:flutter/material.dart';
+import 'package:we_rate_dogs/pages/meeting/sidebar.dart';
 
 import 'bottom_navigation_bar.dart';
-import 'meeting_chat.dart';
+import 'drawer.dart';
+import 'floating_btn.dart';
+import 'meeting_profile_first.dart';
+import 'meeting_profile_overlay.dart';
+import 'meeting_profile_second.dart';
+
+class SizeController {
+  double top = 0;
+  double topSecond;
+  double topFirst = 32;
+  double ratio = 313 / 397;
+  double widthSecond;
+  double widthFirst;
+  double resize = 1.0;
+  BoxConstraints _boxConstraints;
+
+  void init() {
+    double ratio = 345.0 / 533.0;
+
+    var padding = 16 * 2;
+    var width = _boxConstraints.maxWidth - padding;
+    var height = _boxConstraints.maxHeight - padding;
+    if (width > height * ratio) {
+      width = height * ratio;
+    } else {
+      height = width / ratio;
+    }
+    resize = width / 345.0;
+    print("resize $resize");
+  }
+
+  SizeController(BoxConstraints boxConstraints) {
+    this._boxConstraints = boxConstraints;
+    init();
+  }
+}
 
 class MeetingOnePage extends StatefulWidget {
   @override
   _MeetingOnePageState createState() => _MeetingOnePageState();
 }
 
-const CURVE_HEIGHT = 160.0;
-const AVATAR_RADIUS = CURVE_HEIGHT * 0.28;
-const AVATAR_DIAMETER = AVATAR_RADIUS * 2;
-
-class _MeetingOnePageState extends State<MeetingOnePage> {
-  var _scaffoldKey = new GlobalKey<ScaffoldState>();
+class _MeetingOnePageState extends State<MeetingOnePage>
+    with TickerProviderStateMixin {
+  var _scaffoldKey = new GlobalKey<MyDrawerControllerState>();
+  var _meetingSecondLayerKey = new GlobalKey<MeetingSecondLayerState>();
+  var _meetingFirstLayerKey = new GlobalKey<MeetingFirstLayerState>();
+  var _meetingMaskKey = new GlobalKey<MeetingProfileMaskState>();
+  var _floatingState = new GlobalKey<FloatingState>();
+  Widget _child;
   bool selected = false;
-  PageController scrollController;
-  int currentPage = 0;
+  int currentPeople = 0;
+
+  OverlayEntry _drawerEntry;
+  List<String> images = [
+    "assets/meeting/meeting1.png",
+    "assets/meeting/meeting2.png",
+    "assets/meeting/meeting3.png"
+  ];
 
   @override
-  void initState() {
-    super.initState();
-    scrollController = new PageController(initialPage: 0);
-    scrollController.addListener(() {
-      int page = scrollController.page.round();
-      if (page != currentPage) {
-        setState(() {
-          print("change status =====");
-          currentPage = page;
+  void didUpdateWidget(MeetingOnePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+
+    if (mounted) {
+//      print("drawerEntry ${_drawerEntry}");
+//      try {
+//        _drawerEntry?.remove();
+//      } catch (e) {
+//        print(e.toString());
+//      }
+      if (_drawerEntry == null) {
+        _drawerEntry = OverlayEntry(builder: (context) {
+          return buildDrawer(route);
+        });
+        final overlay = Overlay.of(context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            overlay.insert(_drawerEntry);
+          }
         });
       }
-    });
+    }
   }
 
   @override
   void dispose() {
-    scrollController?.dispose();
+    _rejectAnimationController?.dispose();
+    _agreeAnimationController?.dispose();
+    try {
+      _drawerEntry?.remove();
+      print("remove entry");
+    } catch (e) {
+      print(e.toString());
+    }
+    _drawerEntry = null;
     super.dispose();
   }
 
-  Widget third() {
-    return Padding(
-      padding: EdgeInsets.only(left: 38),
-      child: new Opacity(
-        opacity: 0.87,
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: new Border.all(width: 0.0, color: Colors.transparent),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              boxShadow: [
-                BoxShadow(
-                    offset: Offset(0, 0),
-                    blurRadius: 24,
-                    spreadRadius: 0,
-                    color: Colors.black.withAlpha(10)),
-              ]),
-          height: 438,
-          width: 296,
-        ),
-      ),
-    );
+  AnimationController _rejectAnimationController;
+  AnimationController _agreeAnimationController;
+
+  Animation<double> agreeBtnMoveToCenter;
+  Animation<double> agreeBtnRadius;
+  Animation<double> agreeMaskColor;
+  Animation<double> agreeShowPercentage;
+
+  Animation<double> agreeBtnHeight;
+  Animation<double> congratulationFaction;
+  Animation<double> descFaction;
+  Animation<double> goChatFaction;
+
+  Animation<double> rejectBtnMoveToCenter;
+  Animation<double> rejectBtnRadius;
+  Animation<double> rejectMaskColor;
+  Animation<double> rejectDisappear;
+  Animation<double> rejectBtnHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    _rejectAnimationController = new AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+
+    _agreeAnimationController = new AnimationController(
+        vsync: this, duration: Duration(milliseconds: 2000));
+
+    rejectBtnRadius =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _rejectAnimationController,
+          curve: new Interval(
+            0.0,
+            0.2,
+            curve: Curves.fastLinearToSlowEaseIn,
+          ),
+        ));
+
+    rejectBtnMoveToCenter =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _rejectAnimationController,
+          curve: new Interval(
+            0.0,
+            0.5,
+            curve: Curves.fastLinearToSlowEaseIn,
+          ),
+        ));
+
+    rejectMaskColor =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _rejectAnimationController,
+          curve: new Interval(
+            0.05,
+            0.4,
+            curve: Curves.linear,
+          ),
+        ));
+
+    rejectBtnHeight =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _rejectAnimationController,
+          curve: new Interval(
+            0.4,
+            0.7,
+            curve: Curves.linearToEaseOut,
+          ),
+        ));
+
+    rejectDisappear =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _rejectAnimationController,
+          curve: new Interval(
+            0.4,
+            1.0,
+            curve: Curves.linear,
+          ),
+        ));
+
+    double rate = 1.4;
+
+    agreeBtnRadius =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _agreeAnimationController,
+          curve: new Interval(
+            0.0,
+            0.2 / rate,
+            curve: Curves.fastLinearToSlowEaseIn,
+          ),
+        ));
+
+    agreeBtnMoveToCenter =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _agreeAnimationController,
+          curve: new Interval(
+            0.0 / rate,
+            0.4 / rate,
+            curve: Curves.fastLinearToSlowEaseIn,
+          ),
+        ));
+
+    agreeMaskColor =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _agreeAnimationController,
+          curve: new Interval(
+            0.05 / rate,
+            0.4 / rate,
+            curve: Curves.linear,
+          ),
+        ));
+
+    agreeShowPercentage =
+        new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
+          parent: _agreeAnimationController,
+          curve: new Interval(
+            0.4 / rate,
+            1.0 / rate,
+            curve: Curves.linear,
+          ),
+        ));
+
+    agreeBtnHeight =
+        new Tween(begin: 0.0, end: 0.2).animate(new CurvedAnimation(
+            parent: _agreeAnimationController,
+            curve: new Interval(
+              1.0 / rate,
+              1.2 / rate,
+              curve: Curves.linear,
+            )));
+
+    congratulationFaction =
+        new Tween(begin: 3.0, end: 0.0).animate(new CurvedAnimation(
+            parent: _agreeAnimationController,
+            curve: new Interval(
+              1.1 / rate,
+              1.25 / rate,
+              curve: Curves.linear,
+            )));
+
+    descFaction = new Tween(begin: 3.0, end: 0.0).animate(new CurvedAnimation(
+        parent: _agreeAnimationController,
+        curve: new Interval(
+          1.2 / rate,
+          1.35 / rate,
+          curve: Curves.linear,
+        )));
+
+    goChatFaction = new Tween(begin: 3.0, end: 0.0).animate(new CurvedAnimation(
+        parent: _agreeAnimationController,
+        curve: new Interval(
+          1.3 / rate,
+          1.4 / rate,
+          curve: Curves.linear,
+        )));
+
+    _rejectAnimationController.addListener(() {
+      if (_rejectAnimationController.status == AnimationStatus.completed) {
+        currentPeople++;
+        _meetingSecondLayerKey.currentState.setNextImage(getSecondImage());
+        _meetingFirstLayerKey.currentState.setNextImage(getFirstImage());
+        _meetingMaskKey.currentState.reset();
+        _floatingState.currentState.resetReject();
+      } else {
+        _meetingSecondLayerKey.currentState
+            .setPercentage(rejectDisappear.value);
+        _meetingFirstLayerKey.currentState.setPercentage(rejectDisappear.value);
+        _meetingMaskKey.currentState.setChanges(
+          agreePercentage: agreeMaskColor.value,
+          rejectPercentage: rejectMaskColor.value,
+          chatFaction: goChatFaction.value,
+          congratulationFaction: congratulationFaction.value,
+          descFaction: descFaction.value,
+          rejectOpacityFaction: rejectDisappear.value,
+        );
+        _floatingState.currentState.setChanges(
+            agreeBtnRadius: agreeBtnRadius.value,
+            rejectBtnMoveToCenter: rejectBtnMoveToCenter.value,
+            rejectBtnHeight: rejectBtnHeight.value,
+            rejectBtnRadius: rejectBtnRadius.value,
+            rejectDisappear: rejectDisappear.value,
+            agreeBtnMoveToCenter: agreeBtnMoveToCenter.value,
+            agreeBtnHeight: agreeBtnHeight.value,
+            agreeShowPercentage: agreeShowPercentage.value);
+      }
+    });
+    _agreeAnimationController.addListener(() {
+      _meetingMaskKey.currentState.setChanges(
+        agreePercentage: agreeMaskColor.value,
+        rejectPercentage: rejectMaskColor.value,
+        chatFaction: goChatFaction.value,
+        congratulationFaction: congratulationFaction.value,
+        descFaction: descFaction.value,
+        rejectOpacityFaction: rejectDisappear.value,
+      );
+
+      _floatingState.currentState.setChanges(
+          agreeBtnRadius: agreeBtnRadius.value,
+          rejectBtnMoveToCenter: rejectBtnMoveToCenter.value,
+          rejectBtnHeight: rejectBtnHeight.value,
+          rejectBtnRadius: rejectBtnRadius.value,
+          rejectDisappear: rejectDisappear.value,
+          agreeBtnMoveToCenter: agreeBtnMoveToCenter.value,
+          agreeBtnHeight: agreeBtnHeight.value,
+          agreeShowPercentage: agreeShowPercentage.value);
+    });
   }
 
-  Widget second() {
-    return Padding(
-      padding: EdgeInsets.only(left: 24, top: 15),
-      child: new Opacity(
-        opacity: 1,
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: new Border.all(width: 0.0, color: Colors.transparent),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-              boxShadow: [
-                BoxShadow(
-                    offset: Offset(0, 0),
-                    blurRadius: 24,
-                    spreadRadius: 0,
-                    color: Colors.black.withAlpha(10)),
-              ]),
-          height: 414,
-          width: 324,
-        ),
-      ),
-    );
+  String getFirstImage() {
+    return images[currentPeople % 3];
   }
 
-  Widget first() {
-    return Padding(
-      padding: EdgeInsets.only(left: 17, top: 31),
+  String getSecondImage() {
+    return images[(currentPeople + 1) % 3];
+  }
+
+  Widget buildDrawer(ModalRoute<dynamic> route) {
+    return LayoutBuilder(builder: (context, reg) {
+      return MyDrawerController(
+        key: _scaffoldKey,
+        router: route,
+        child: MeetRequirementSideBar(reg),
+      );
+    });
+  }
+
+  Widget third(sizeController) {
+    return new Opacity(
+      opacity: 0.87,
       child: Container(
-        child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: <Widget>[
-                FractionallySizedBox(
-                    widthFactor: 1,
-                    child: Container(
-                        height: 397,
-                        child: Stack(
-                          children: <Widget>[
-                            PageView(
-                              controller: scrollController,
-                              physics: ClampingScrollPhysics(),
-                              scrollDirection: Axis.horizontal,
-                              children: <Widget>[
-                                Container(
-                                    height: 397,
-                                    width: 320,
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          'assets/meeting/meeting1.png'),
-                                      // ...
-                                    ))),
-                                Container(
-                                    height: 397,
-                                    width: 320,
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          'assets/meeting/meeting1.png'),
-                                    ))),
-                                Container(
-                                    height: 397,
-                                    width: 320,
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          'assets/meeting/meeting1.png'),
-                                      // ...
-                                    )))
-                              ],
-                            ),
-                            Positioned(
-                              top: 33,
-                              left: (320 - 104) / 2,
-                              child: Container(
-                                width: 104,
-                                height: 2,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Container(
-                                      color: (currentPage == 0)
-                                          ? Colors.white
-                                          : Colors.grey.withOpacity(0.8),
-                                      height: 2,
-                                      width: 32,
-                                    ),
-                                    Container(
-                                      color: (currentPage == 1)
-                                          ? Colors.white
-                                          : Colors.grey.withOpacity(0.8),
-                                      height: 2,
-                                      width: 32,
-                                    ),
-                                    Container(
-                                      color: (currentPage == 2)
-                                          ? Colors.white
-                                          : Colors.grey.withOpacity(0.8),
-                                      height: 2,
-                                      width: 32,
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ))),
-                Expanded(
-                    child: Container(
-                        padding: EdgeInsets.only(top: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Text("Svetland Henderson, 21",
-                                    style: TextStyle(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w700)),
-                                Container(
-                                  margin: EdgeInsets.only(left: 4),
-                                  decoration: new BoxDecoration(
-                                      color: Color.fromARGB(255, 204, 233, 240),
-                                      shape: BoxShape.circle),
-                                  padding: EdgeInsets.all(3),
-                                  child: Icon(Icons.check,
-                                      size: 15, color: Colors.white),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: <Widget>[
-                                Icon(Icons.location_on,
-                                    size: 15, color: Colors.grey),
-                                Text("Russian,Moscow (7km)",
-                                    style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w300))
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              height: 0.5,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 10),
-                            Text("Cinema, Photo, Tattoo, Bicycle, Cooking",
-                                style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w300)),
-                          ],
-                        )))
-              ],
-            )),
         decoration: BoxDecoration(
             color: Colors.white,
+            border: new Border.all(width: 0.0, color: Colors.transparent),
             borderRadius: BorderRadius.all(Radius.circular(12)),
-            border: new Border.all(width: 0.1, color: Colors.transparent),
             boxShadow: [
               BoxShadow(
                   offset: Offset(0, 0),
@@ -238,23 +347,29 @@ class _MeetingOnePageState extends State<MeetingOnePage> {
                   spreadRadius: 0,
                   color: Colors.black.withAlpha(10)),
             ]),
-        height: 533,
-        width: 345,
+        height: 438 * sizeController.resize,
+        width: 296 * sizeController.resize,
       ),
+//      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build contenxt==");
     return Container(
       color: Colors.white,
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
       child: CustomPaint(
-        painter: MyPainter(),
-        child: Scaffold(
-            key: _scaffoldKey,
-            endDrawer: new AppDrawer(),
+          painter: MyPainter(),
+          child: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
               elevation: 0.0,
@@ -269,7 +384,7 @@ class _MeetingOnePageState extends State<MeetingOnePage> {
                   icon: Icon(Icons.filter_list),
                   color: Colors.black,
                   onPressed: () {
-                    _scaffoldKey.currentState.openEndDrawer(); // right s
+                    _scaffoldKey.currentState.toggle();
                   },
                 ),
               ],
@@ -279,191 +394,63 @@ class _MeetingOnePageState extends State<MeetingOnePage> {
             bottomNavigationBar: MyBottom(),
             floatingActionButton: (selected)
                 ? IgnorePointer()
-                : new Floating(
-                    onChoose: () {
-                      setState(() {
-                        this.selected = true;
-                      });
-                    },
-                  ),
+                : Floating(
+                key: _floatingState,
+                agreeBtnRadius: agreeBtnRadius.value,
+                rejectBtnMoveToCenter: rejectBtnMoveToCenter.value,
+                rejectBtnHeight: rejectBtnHeight.value,
+                rejectBtnRadius: rejectBtnRadius.value,
+                rejectDisappear: rejectDisappear.value,
+                agreeBtnMoveToCenter: agreeBtnMoveToCenter.value,
+                agreeBtnHeight: agreeBtnHeight.value,
+                agreeShowPercentage: agreeShowPercentage.value,
+                onReject: () {
+                  _rejectAnimationController.forward(from: 0.0);
+                },
+                onAgree: () {
+                  _agreeAnimationController.forward(from: 0.0);
+                }),
             body: Container(
-              color: Colors.transparent,
-              child: Center(
-                  child: GestureDetector(
-                child: Stack(
-                    children: <Widget>[
-                  third(),
-                  second(),
-                  first(),
-                ]..add(selected
-                        ? Padding(
-                            padding: EdgeInsets.only(left: 17, top: 31),
-                            child: Container(
-                              child: Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Container(
-                                    height: 397,
-                                    width: 314,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Container(
-                                          height: 90,
-                                          width: 90,
-                                          decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                  color: Colors.white,
-                                                  width: 3)),
-                                          child: Icon(
-                                            Icons.done,
-                                            color: Colors.white,
-                                            size: 50,
-                                          ),
-                                        ),
-                                        Container(
-                                            padding: EdgeInsets.only(top: 20),
-                                            child: Text("Congratulations!",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 18))),
-                                        Container(
-                                            padding: EdgeInsets.only(
-                                                top: 20, left: 15, right: 15),
-                                            child: Text(
-                                                "You can chat with Kristina according to your interests",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                ))),
-                                        SizedBox(height: 25),
-                                        Material(
-                                          color: Colors.transparent,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(3)),
-                                              color:
-                                                  Colors.white.withOpacity(0.9),
-                                            ),
-                                            child: InkWell(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(3)),
-                                                onTap: () => Navigator.of(
-                                                        context)
-                                                    .push(MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            MeetingChatPage())),
-//                                                  MeetingChatPage
-
-                                                child: Center(
-                                                  child: Text("Go to chat",
-                                                      style: TextStyle(
-                                                          fontSize: 16)),
-                                                )),
-                                            width: 157,
-                                            height: 43,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    color: Color(0xFFFE5F63).withOpacity(0.9),
-                                  )),
-                            ))
-                        : IgnorePointer())),
-              )),
-            )),
-      ),
-    );
-  }
-}
-
-class Floating extends StatelessWidget {
-  final VoidCallback onChoose;
-
-  const Floating({
-    Key key,
-    this.onChoose,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Align(
-            alignment: Alignment(-1.2, 0.1),
-            child: Container(
-              child: Material(
                 color: Colors.transparent,
-                shadowColor: const Color(0x44000000),
-                child: Container(
-                  margin: EdgeInsets.only(left: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
-                    borderRadius: BorderRadius.all(Radius.circular(44)),
-                  ),
-                  width: 88,
-                  height: 88,
-                  child: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(44)),
-                      child: Align(
-                        alignment: Alignment(0.0, 0.0),
-                        child: Icon(
-                          Icons.arrow_back_ios,
-                          color: Colors.white,
-                        ),
-                      ),
-                      splashColor: const Color(0x44000000),
-                      radius: 400.0,
-                      onTap: () {
-                        print("=========");
-                      }),
-                ),
-              ),
-            )),
-        Align(
-          alignment: Alignment(1.1, 0.1),
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFFE5F63).withOpacity(0.9),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(44),
-                      bottomLeft: Radius.circular(44)),
-                ),
-                width: 90,
-                height: 88,
-                child: InkWell(
-                  onTap: () {
-                    if (this.onChoose != null) {
-                      this.onChoose();
+                child: Center(
+                  child: LayoutBuilder(builder: (context, con) {
+                    if (_child == null) {
+                      SizeController controller = SizeController(con);
+                      _child = Stack(
+                        children: [
+                          Padding(
+                              padding: EdgeInsets.only(top: 0),
+                              child: third(controller)),
+                          MeetingSecondLayer(
+                            sizeController: controller,
+                            image: getSecondImage(),
+                            percentage: rejectDisappear.value,
+                            key: _meetingSecondLayerKey,
+                          ),
+                          MeetingFirstLayer(
+                            key: _meetingFirstLayerKey,
+                            sizeController: controller,
+                            image: getFirstImage(),
+                            percentage: rejectDisappear.value,
+                          ),
+                          MeetingProfileMask(
+                            key: _meetingMaskKey,
+                            sizeController: controller,
+                            agreePercentage: agreeMaskColor.value,
+                            rejectPercentage: rejectMaskColor.value,
+                            chatFaction: goChatFaction.value,
+                            congratulationFaction: congratulationFaction.value,
+                            descFaction: descFaction.value,
+                            rejectOpacityFaction: rejectDisappear.value,
+                          )
+                        ],
+                        alignment: Alignment.topCenter,
+                      );
                     }
-
-//                    print("======|| x===");
-                  },
-                  radius: 400,
-                  child: Align(
-                    alignment: Alignment(0.5, 0.0),
-                    child: Icon(
-                      Icons.done,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
-                  splashColor: const Color(0x44000000),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(44),
-                      bottomLeft: Radius.circular(44)),
+                    return _child;
+                  }),
                 )),
-          ),
-        ),
-      ],
+          )),
     );
   }
 }
@@ -471,7 +458,8 @@ class Floating extends StatelessWidget {
 class MyPainter extends CustomPainter {
   final Paint lightBluePaint = Paint()
     ..color = Color.fromARGB(255, 240, 244, 248);
-  final Paint bluePaint = Paint()..color = Colors.white;
+  final Paint bluePaint = Paint()
+    ..color = Colors.white;
   final TextPainter textPainter = TextPainter(
     textDirection: TextDirection.ltr,
   );
@@ -479,15 +467,18 @@ class MyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var rect = Rect.fromLTWH(55, -674, 1064, 1064);
-    final Path smallWhite = Path()..addOval(rect);
+    final Path smallWhite = Path()
+      ..addOval(rect);
     canvas.drawPath(smallWhite, lightBluePaint);
 
     var rect2 = Rect.fromLTWH(304, -73, 177, 177);
-    final Path smallWhite2 = Path()..addOval(rect2);
+    final Path smallWhite2 = Path()
+      ..addOval(rect2);
     canvas.drawPath(smallWhite2, bluePaint);
 
     var rect3 = Rect.fromLTWH(-661, 406, 1032, 1032);
-    final Path bottom = Path()..addOval(rect3);
+    final Path bottom = Path()
+      ..addOval(rect3);
     canvas.drawPath(bottom, lightBluePaint);
   }
 
@@ -496,379 +487,3 @@ class MyPainter extends CustomPainter {
     return false;
   }
 }
-
-class AppDrawer extends StatefulWidget {
-  @override
-  _AppDrawerState createState() => new _AppDrawerState();
-}
-
-class _AppDrawerState extends State<AppDrawer> {
-  Color active = Color(0xFFFE5F63);
-  RangeValues _values = RangeValues(0.3, 0.7);
-
-  @override
-  Widget build(BuildContext context) {
-    return new SizedBox(
-        width: MediaQuery.of(context).size.width * 0.85, //20.0,
-        child: Drawer(
-          elevation: 12,
-          child: new ListView(
-            children: <Widget>[
-              Container(
-                  height: 800.0,
-                  child: new Container(
-                      padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            new Text("Filter", style: TextStyle(fontSize: 23)),
-                            Padding(
-                              padding: EdgeInsets.only(top: 20, bottom: 30),
-                              child: new Text("Who are you looking for?",
-                                  style: TextStyle(fontSize: 18)),
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Container(
-                                  height: 43,
-                                  width: 138,
-                                  decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      border: Border.all(
-                                          color: Colors.grey, width: 0.5)),
-                                  child: Center(
-                                    child: Text("Man",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.black)),
-                                  ),
-                                ),
-                                Container(
-                                  height: 43,
-                                  width: 138,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("Woman",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            new Container(
-//                              padding: EdgeInsets.only(top: 30),
-                              color: Colors.grey,
-                              height: 0.5,
-                            ),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            new Text("Interests",
-                                style: TextStyle(fontSize: 23)),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                Container(
-                                  height: 43,
-                                  width: 85,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("Cinema",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                ),
-                                Container(
-                                  height: 43,
-                                  width: 85,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("Bowling",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                ),
-                                Container(
-                                  height: 43,
-                                  width: 85,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("Tattoo",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 12,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                Container(
-                                  height: 43,
-                                  width: 85,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("Billiards",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                ),
-                                Container(
-                                  height: 43,
-                                  width: 135,
-                                  decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(2)),
-                                      color: active,
-                                      border: Border.all(
-                                          color: Colors.transparent)),
-                                  child: Center(
-                                    child: Text("To drink coffee",
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.white)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Container(
-                              width: 320,
-                              padding: EdgeInsets.only(
-                                top: 15,
-                                bottom: 15,
-                                left: 30,
-                                right: 30,
-                              ),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: Colors.grey, width: 0.5)),
-                              child:
-                                  Center(child: Text("Choose other interests")),
-                            ),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            IntrinsicHeight(
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        child: Text("Distance",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 20)),
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: <Widget>[
-                                        Icon(Icons.location_on,
-                                            size: 12, color: Colors.grey),
-                                        Text("15 km",
-                                            style: TextStyle(
-                                                color: Colors.black87,
-                                                fontSize: 14))
-                                      ],
-                                    )),
-                                  ]),
-                            ),
-                            SizedBox(
-                              height: 1,
-                            ),
-                            SliderTheme(
-                              data: SliderThemeData(
-                                  rangeThumbShape: _CustomRangeThumbShape(),
-                                  inactiveTrackColor: Colors.grey
-                                  // ...
-                                  ),
-                              child: RangeSlider(
-                                values: _values,
-                                activeColor: active,
-                                onChanged: (RangeValues values) {
-                                  setState(() {
-                                    _values = values;
-                                  });
-                                },
-                              ),
-                            ),
-                            SizedBox(
-                              height: 30,
-                            ),
-                            IntrinsicHeight(
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        child: Text("Distance",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 20)),
-                                      ),
-                                    ),
-                                    Expanded(
-                                        child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: <Widget>[
-                                        Icon(Icons.location_on,
-                                            size: 12, color: Colors.grey),
-                                        Text("15 km",
-                                            style: TextStyle(
-                                                color: Colors.black87,
-                                                fontSize: 14))
-                                      ],
-                                    )),
-                                  ]),
-                            ),
-                            SizedBox(
-                              height: 1,
-                            ),
-                            SliderTheme(
-                              data: SliderThemeData(
-                                  rangeThumbShape: _CustomRangeThumbShape(),
-                                  inactiveTrackColor: Colors.grey
-                                  // ...
-                                  ),
-                              child: RangeSlider(
-                                values: _values,
-                                activeColor: active,
-                                onChanged: (RangeValues values) {
-                                  setState(() {
-                                    _values = values;
-                                  });
-                                },
-                              ),
-                            )
-                          ]))),
-            ],
-          ),
-        ));
-  }
-}
-
-class _CustomRangeThumbShape extends RangeSliderThumbShape {
-  static const double _thumbSize = 4.0;
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
-      Size(_thumbSize, _thumbSize);
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset center, {
-    @required Animation<double> activationAnimation,
-    @required Animation<double> enableAnimation,
-    bool isDiscrete = false,
-    bool isEnabled = false,
-    bool isOnTop,
-    @required SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    Thumb thumb,
-  }) {
-    final Canvas canvas = context.canvas;
-    final Paint lightBluePaint = Paint()
-      ..color = Color(0xFFFE5F63).withOpacity(0.5);
-    canvas.drawCircle(center, 29 / 2, lightBluePaint);
-
-    final Paint white = Paint()..color = Colors.white;
-    canvas.drawCircle(center, 27 / 2, white);
-    final Paint cen = Paint()..color = Color(0xFFFE5F63);
-    canvas.drawCircle(center, 13 / 2, cen);
-
-//    Path thumbPath;
-//    switch (textDirection) {
-//      case TextDirection.rtl:
-//        switch (thumb) {
-//          case Thumb.start:
-//            thumbPath = _rightTriangle(_thumbSize, center);
-//            break;
-//          case Thumb.end:
-//            thumbPath = _leftTriangle(_thumbSize, center);
-//            break;
-//        }
-//        break;
-//      case TextDirection.ltr:
-//        switch (thumb) {
-//          case Thumb.start:
-//            thumbPath = _leftTriangle(_thumbSize, center);
-//            break;
-//          case Thumb.end:
-//            thumbPath = _rightTriangle(_thumbSize, center);
-//            break;
-//        }
-//        break;
-//    }
-//    canvas.drawPath(thumbPath, Paint()
-//      ..color = sliderTheme.thumbColor);
-  }
-}
-
-Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final Path thumbPath = Path();
-  final double halfSize = size / 2.0;
-  final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx + halfSize * sign, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy - size);
-  thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy + size);
-  thumbPath.close();
-  return thumbPath;
-}
-
-Path _leftTriangle(double size, Offset thumbCenter) =>
-    _rightTriangle(size, thumbCenter, invert: true);

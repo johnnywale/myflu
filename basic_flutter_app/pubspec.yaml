@@ -36,6 +36,7 @@ flutter:
     - assets/story/
     - assets/meeting/
     - assets/food_app/
+    - assets/condo/
 
 
   fonts:

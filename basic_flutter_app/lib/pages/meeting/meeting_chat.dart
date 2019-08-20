@@ -6,34 +6,26 @@ class MeetingChatPage extends StatefulWidget {
 }
 
 class MeetingChatPageState extends State<MeetingChatPage> {
-  var _scaffoldKey = new GlobalKey<ScaffoldState>();
-  bool selected = false;
   FocusNode myFocusNode;
 
   @override
   void initState() {
     super.initState();
-
     myFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
-    // Clean up the focus node when the Form is disposed.
     myFocusNode.dispose();
-
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
         body: GestureDetector(
           onTap: () {
             myFocusNode.unfocus();
-
           },
           child: Container(
             decoration: BoxDecoration(
@@ -66,18 +58,12 @@ class MeetingChatPageState extends State<MeetingChatPage> {
         ),
         backgroundColor: Colors.transparent,
         bottomNavigationBar: Container(
-            height: 77 + MediaQuery
-                .of(context)
-                .padding
-                .bottom,
+            height: 77 + MediaQuery.of(context).padding.bottom,
             color: Colors.white,
             padding: EdgeInsets.only(
                 left: 14,
                 right: 14,
-                bottom: MediaQuery
-                    .of(context)
-                    .padding
-                    .bottom),
+                bottom: MediaQuery.of(context).padding.bottom),
             child: Center(
               child: TextField(
                 focusNode: myFocusNode,

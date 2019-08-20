@@ -21,7 +21,7 @@ class ItemEffect extends StatefulWidget {
 
 class _ItemEffect extends State<ItemEffect> with TickerProviderStateMixin {
   AnimationController _controller;
-  Animation _offsetFloat;
+  Animation<Offset> _offsetFloat;
   Animation<double> _opacity;
   bool animated = false;
   bool disposed = false;

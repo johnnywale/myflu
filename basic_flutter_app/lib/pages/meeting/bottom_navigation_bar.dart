@@ -5,10 +5,6 @@ class MyBottom extends StatefulWidget {
   _MyBottomState createState() => _MyBottomState();
 }
 
-const CURVE_HEIGHT = 160.0;
-const AVATAR_RADIUS = CURVE_HEIGHT * 0.28;
-const AVATAR_DIAMETER = AVATAR_RADIUS * 2;
-
 class _MyBottomState extends State<MyBottom> {
   int currentIndex = 1;
   Color normal = Color(0xFFA1B7CB);

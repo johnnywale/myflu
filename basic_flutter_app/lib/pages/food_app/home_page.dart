@@ -17,6 +17,8 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
   double ratio = 0.8;
   double currentPage = 0.0;
 
+
+
   @override
   void initState() {
     double fraction = 259 / 378;
@@ -28,14 +30,12 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
       int cPage = _pageController.page.toInt();
       double diff = _pageController.page - cPage;
       double currentRatio = 0.2 * diff + 0.8;
-//      if (currentRatio != ratio) {
       setState(() {
         currentPage = _pageController.page;
         print("set status...currentPage $currentPage");
 
         ratio = currentRatio;
       });
-//      }
     });
     super.initState();
   }
@@ -178,8 +178,6 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
     bool beMin = diff <= -1;
     print("my index is $index diff is diff $diff");
 
-//    bool beMax = index - _pageController.page >= 1;
-//    bool beMin = index - _pageController.page < 0;
     double drawRadio = ratio;
     if (beMax) {
       drawRadio = 1.0;
@@ -190,8 +188,8 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
     }
 
     return LayoutBuilder(builder: (context, constrains) {
-      print(
-          "second ==current ratio is $drawRadio ,  ${constrains.maxWidth} || ${constrains.minWidth}");
+//      print(
+//          "second ==current ratio is $drawRadio ,  ${constrains.maxWidth} || ${constrains.minWidth}");
       return Container(
           //    color: Colors.pink,
           padding: EdgeInsets.only(
@@ -290,7 +288,34 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
                         }
                       },
                     ),
-                  ))
+                  )),
+              Container(
+                  margin: EdgeInsets.only(top: 20, left: 42.5, right: 42.5),
+                  height: 18.5,
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        height: 18.5,
+                        child: Image.asset("assets/food_app/hand.png"),
+                      ),
+                      Text("  Popular",
+                          style: TextStyle(
+                              color: Color(0xffffab82), fontSize: 17)),
+                    ],
+                  )),
+              Container(
+                margin: EdgeInsets.only(top: 20, left: 42.5, right: 42.5),
+                height: 115,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Color(0xffA8AEC9).withAlpha(14),
+                          offset: Offset(0, 4),
+                          blurRadius: 6)
+                    ]),
+              )
             ],
           )),
     ));

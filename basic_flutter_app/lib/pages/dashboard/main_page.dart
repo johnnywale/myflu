@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:popup_menu/popup_menu.dart';
+import 'package:we_rate_dogs/condo/login.dart';
 import 'package:we_rate_dogs/data/data.dart';
 import 'package:we_rate_dogs/drawer/exampleCustomMenu/ExampleCustomMenu.dart';
 import 'package:we_rate_dogs/drawer/exampleHiddenDrawer/example_hidden_drawer.dart';
@@ -16,6 +17,7 @@ import 'package:we_rate_dogs/pages/dashboard/account_page.dart';
 import 'package:we_rate_dogs/pages/food_app/food_app.dart';
 import 'package:we_rate_dogs/pages/fruit/main_plate.dart';
 import 'package:we_rate_dogs/pages/meeting/meeting_one.dart';
+import 'package:we_rate_dogs/pages/meeting/meeting_widgets.dart';
 import 'package:we_rate_dogs/pages/personalized_tab_bar/main_app_bar.dart';
 import 'package:we_rate_dogs/pages/shose/shop_items_page.dart';
 import 'package:we_rate_dogs/pages/story/main.dart';
@@ -248,6 +250,30 @@ class _MainPageState extends State<MainPage> {
                               },
                               context: context,
                               items: [
+                                //CondoLoginPage
+
+                                MenuItem(
+                                  title: 'Condo',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) => CondoLoginPage())),
+                                  image: Icon(
+                                    Icons.home,
+                                    color: Colors.white,
+                                  ),
+                                ),
+
+                                MenuItem(
+                                  title: 'Widgets',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) => WidgetTest())),
+                                  image: Icon(
+                                    Icons.alarm,
+                                    color: Colors.white,
+                                  ),
+                                ),
+
                                 MenuItem(
                                   title: 'Meeting',
                                   userInfo: () => Navigator.of(context).push(

@@ -119,6 +119,7 @@ class _MenuItemWidgetState extends State<_MenuItemWidget>
   @override
   void dispose() {
     super.dispose();
+    timer.cancel();
   }
 
   void _onRefresh() {
