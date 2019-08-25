@@ -17,10 +17,11 @@ import 'package:we_rate_dogs/pages/dashboard/account_page.dart';
 import 'package:we_rate_dogs/pages/food_app/food_app.dart';
 import 'package:we_rate_dogs/pages/fruit/main_plate.dart';
 import 'package:we_rate_dogs/pages/meeting/meeting_one.dart';
-import 'package:we_rate_dogs/pages/meeting/meeting_widgets.dart';
 import 'package:we_rate_dogs/pages/personalized_tab_bar/main_app_bar.dart';
 import 'package:we_rate_dogs/pages/shose/shop_items_page.dart';
 import 'package:we_rate_dogs/pages/story/main.dart';
+import 'package:we_rate_dogs/pages/video/audio.dart';
+import 'package:we_rate_dogs/pages/video/video.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -264,15 +265,29 @@ class _MainPageState extends State<MainPage> {
                                 ),
 
                                 MenuItem(
-                                  title: 'Widgets',
+                                  title: 'Audio',
                                   userInfo: () => Navigator.of(context).push(
                                       MaterialPageRoute(
-                                          builder: (_) => WidgetTest())),
+                                          builder: (_) => AudioExampleApp())),
                                   image: Icon(
                                     Icons.alarm,
                                     color: Colors.white,
                                   ),
                                 ),
+
+                                //
+                                MenuItem(
+                                  title: 'VideoApp',
+                                  userInfo: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (_) => VideoApp())),
+                                  image: Icon(
+                                    Icons.alarm,
+                                    color: Colors.white,
+                                  ),
+                                ),
+
+
 
                                 MenuItem(
                                   title: 'Meeting',

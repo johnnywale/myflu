@@ -4,6 +4,7 @@ import 'package:we_rate_dogs/pages/meeting/sidebar.dart';
 import 'bottom_navigation_bar.dart';
 import 'drawer.dart';
 import 'floating_btn.dart';
+import 'meeting_data.dart';
 import 'meeting_profile_first.dart';
 import 'meeting_profile_overlay.dart';
 import 'meeting_profile_second.dart';
@@ -138,95 +139,95 @@ class _MeetingOnePageState extends State<MeetingOnePage>
 
     rejectBtnRadius =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _rejectAnimationController,
-          curve: new Interval(
-            0.0,
-            0.2,
-            curve: Curves.fastLinearToSlowEaseIn,
-          ),
-        ));
+      parent: _rejectAnimationController,
+      curve: new Interval(
+        0.0,
+        0.2,
+        curve: Curves.fastLinearToSlowEaseIn,
+      ),
+    ));
 
     rejectBtnMoveToCenter =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _rejectAnimationController,
-          curve: new Interval(
-            0.0,
-            0.5,
-            curve: Curves.fastLinearToSlowEaseIn,
-          ),
-        ));
+      parent: _rejectAnimationController,
+      curve: new Interval(
+        0.0,
+        0.5,
+        curve: Curves.fastLinearToSlowEaseIn,
+      ),
+    ));
 
     rejectMaskColor =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _rejectAnimationController,
-          curve: new Interval(
-            0.05,
-            0.4,
-            curve: Curves.linear,
-          ),
-        ));
+      parent: _rejectAnimationController,
+      curve: new Interval(
+        0.05,
+        0.4,
+        curve: Curves.linear,
+      ),
+    ));
 
     rejectBtnHeight =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _rejectAnimationController,
-          curve: new Interval(
-            0.4,
-            0.7,
-            curve: Curves.linearToEaseOut,
-          ),
-        ));
+      parent: _rejectAnimationController,
+      curve: new Interval(
+        0.4,
+        0.7,
+        curve: Curves.linearToEaseOut,
+      ),
+    ));
 
     rejectDisappear =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _rejectAnimationController,
-          curve: new Interval(
-            0.4,
-            1.0,
-            curve: Curves.linear,
-          ),
-        ));
+      parent: _rejectAnimationController,
+      curve: new Interval(
+        0.4,
+        1.0,
+        curve: Curves.linear,
+      ),
+    ));
 
     double rate = 1.4;
 
     agreeBtnRadius =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _agreeAnimationController,
-          curve: new Interval(
-            0.0,
-            0.2 / rate,
-            curve: Curves.fastLinearToSlowEaseIn,
-          ),
-        ));
+      parent: _agreeAnimationController,
+      curve: new Interval(
+        0.0,
+        0.2 / rate,
+        curve: Curves.fastLinearToSlowEaseIn,
+      ),
+    ));
 
     agreeBtnMoveToCenter =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _agreeAnimationController,
-          curve: new Interval(
-            0.0 / rate,
-            0.4 / rate,
-            curve: Curves.fastLinearToSlowEaseIn,
-          ),
-        ));
+      parent: _agreeAnimationController,
+      curve: new Interval(
+        0.0 / rate,
+        0.4 / rate,
+        curve: Curves.fastLinearToSlowEaseIn,
+      ),
+    ));
 
     agreeMaskColor =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _agreeAnimationController,
-          curve: new Interval(
-            0.05 / rate,
-            0.4 / rate,
-            curve: Curves.linear,
-          ),
-        ));
+      parent: _agreeAnimationController,
+      curve: new Interval(
+        0.05 / rate,
+        0.4 / rate,
+        curve: Curves.linear,
+      ),
+    ));
 
     agreeShowPercentage =
         new Tween(begin: 0.0, end: 1.0).animate(new CurvedAnimation(
-          parent: _agreeAnimationController,
-          curve: new Interval(
-            0.4 / rate,
-            1.0 / rate,
-            curve: Curves.linear,
-          ),
-        ));
+      parent: _agreeAnimationController,
+      curve: new Interval(
+        0.4 / rate,
+        1.0 / rate,
+        curve: Curves.linear,
+      ),
+    ));
 
     agreeBtnHeight =
         new Tween(begin: 0.0, end: 0.2).animate(new CurvedAnimation(
@@ -359,14 +360,8 @@ class _MeetingOnePageState extends State<MeetingOnePage>
     print("build contenxt==");
     return Container(
       color: Colors.white,
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
-      height: MediaQuery
-          .of(context)
-          .size
-          .height,
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
       child: CustomPaint(
           painter: MyPainter(),
           child: Scaffold(
@@ -377,11 +372,11 @@ class _MeetingOnePageState extends State<MeetingOnePage>
               leading: IconButton(
                 color: Colors.black,
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.arrow_back, color: Colors.black),
+                icon: Icon(MeetingIcon.menu, color: Colors.black),
               ),
               actions: <Widget>[
                 IconButton(
-                  icon: Icon(Icons.filter_list),
+                  icon: Icon(MeetingIcon.filter),
                   color: Colors.black,
                   onPressed: () {
                     _scaffoldKey.currentState.toggle();
@@ -395,21 +390,21 @@ class _MeetingOnePageState extends State<MeetingOnePage>
             floatingActionButton: (selected)
                 ? IgnorePointer()
                 : Floating(
-                key: _floatingState,
-                agreeBtnRadius: agreeBtnRadius.value,
-                rejectBtnMoveToCenter: rejectBtnMoveToCenter.value,
-                rejectBtnHeight: rejectBtnHeight.value,
-                rejectBtnRadius: rejectBtnRadius.value,
-                rejectDisappear: rejectDisappear.value,
-                agreeBtnMoveToCenter: agreeBtnMoveToCenter.value,
-                agreeBtnHeight: agreeBtnHeight.value,
-                agreeShowPercentage: agreeShowPercentage.value,
-                onReject: () {
-                  _rejectAnimationController.forward(from: 0.0);
-                },
-                onAgree: () {
-                  _agreeAnimationController.forward(from: 0.0);
-                }),
+                    key: _floatingState,
+                    agreeBtnRadius: agreeBtnRadius.value,
+                    rejectBtnMoveToCenter: rejectBtnMoveToCenter.value,
+                    rejectBtnHeight: rejectBtnHeight.value,
+                    rejectBtnRadius: rejectBtnRadius.value,
+                    rejectDisappear: rejectDisappear.value,
+                    agreeBtnMoveToCenter: agreeBtnMoveToCenter.value,
+                    agreeBtnHeight: agreeBtnHeight.value,
+                    agreeShowPercentage: agreeShowPercentage.value,
+                    onReject: () {
+                      _rejectAnimationController.forward(from: 0.0);
+                    },
+                    onAgree: () {
+                      _agreeAnimationController.forward(from: 0.0);
+                    }),
             body: Container(
                 color: Colors.transparent,
                 child: Center(
@@ -458,8 +453,7 @@ class _MeetingOnePageState extends State<MeetingOnePage>
 class MyPainter extends CustomPainter {
   final Paint lightBluePaint = Paint()
     ..color = Color.fromARGB(255, 240, 244, 248);
-  final Paint bluePaint = Paint()
-    ..color = Colors.white;
+  final Paint bluePaint = Paint()..color = Colors.white;
   final TextPainter textPainter = TextPainter(
     textDirection: TextDirection.ltr,
   );
@@ -467,18 +461,15 @@ class MyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var rect = Rect.fromLTWH(55, -674, 1064, 1064);
-    final Path smallWhite = Path()
-      ..addOval(rect);
+    final Path smallWhite = Path()..addOval(rect);
     canvas.drawPath(smallWhite, lightBluePaint);
 
     var rect2 = Rect.fromLTWH(304, -73, 177, 177);
-    final Path smallWhite2 = Path()
-      ..addOval(rect2);
+    final Path smallWhite2 = Path()..addOval(rect2);
     canvas.drawPath(smallWhite2, bluePaint);
 
     var rect3 = Rect.fromLTWH(-661, 406, 1032, 1032);
-    final Path bottom = Path()
-      ..addOval(rect3);
+    final Path bottom = Path()..addOval(rect3);
     canvas.drawPath(bottom, lightBluePaint);
   }
 

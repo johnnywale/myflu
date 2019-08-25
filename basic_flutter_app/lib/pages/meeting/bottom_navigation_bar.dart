@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'meeting_data.dart';
+
 class MyBottom extends StatefulWidget {
   @override
   _MyBottomState createState() => _MyBottomState();
@@ -38,7 +40,7 @@ class _MyBottomState extends State<MyBottom> {
               currentIndex = 2;
               setState(() {});
             },
-            icon: Icon(Icons.chat,
+            icon: Icon(MeetingIcon.chat,
                 size: 23, color: (currentIndex == 2) ? active : normal),
           ),
           IconButton(

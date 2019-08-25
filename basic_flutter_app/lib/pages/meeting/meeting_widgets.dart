@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:we_rate_dogs/pages/meeting/slider.dart';
 
 typedef ValueShouldChanged<T> = bool Function(T value);
 
@@ -16,24 +15,149 @@ class _WidgetTestState extends State<WidgetTest> {
             color: Colors.purple,
             child: Center(
                 child: Material(
-              child: InkWell(
-                  onTap: () {
-                    print("==xx==|| ===");
-                  },
-                  child: Ink(
-                    width: 400,
-                    height: 300,
-                    decoration: BoxDecoration(
-                        color: Colors.deepOrange,
-                        gradient: RadialGradient(colors: [
-                          Colors.orange,
-                          Colors.brown,
-                        ])),
-                    child: Container(
-                      child: SingleSelector(),
-                    ),
-                  )),
-            ))));
+                    child: InkWell(
+                        onTap: () {
+                          print("==xx==|| ===");
+                        },
+                        child: Ink(
+                            width: 400,
+                            height: 300,
+                            decoration: BoxDecoration(
+                                color: Colors.deepOrange,
+                                gradient: RadialGradient(colors: [
+                                  Colors.orange,
+                                  Colors.brown,
+                                ])),
+                            child: Container(child: MeetSlider())))))));
+  }
+}
+
+class MeetSlider extends StatefulWidget {
+  @override
+  _MeetSliderState createState() => _MeetSliderState();
+}
+
+class _MeetSliderState extends State<MeetSlider> {
+  double value = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+        inactiveTrackColor: Colors.grey,
+        activeTrackColor: active,
+        thumbShape: MeetSliderThumbShape(),
+//                                trackShape: _CustomThumbShape(),
+      ),
+      child: Slider(
+        value: value,
+        onChanged: (val) {
+          this.value = val;
+          setState(() {});
+        },
+      ),
+    );
+  }
+}
+
+class MeetRangeSlider extends StatefulWidget {
+  @override
+  MeetRangeSliderState createState() => MeetRangeSliderState();
+}
+
+const Color active = Color(0xFFFE5F63);
+
+class MeetRangeSliderState extends State<MeetRangeSlider> {
+  RangeValues rangeValue = RangeValues(0.3, 0.7);
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+          rangeThumbShape: _CustomRangeThumbShape(),
+          inactiveTrackColor: Colors.grey
+// ...
+          ),
+      child: RangeSlider(
+        values: rangeValue,
+        activeColor: active,
+        onChanged: (RangeValues values) {
+          setState(() {
+            rangeValue = values;
+          });
+        },
+      ),
+    );
+  }
+}
+
+class _CustomRangeThumbShape extends RangeSliderThumbShape {
+  static const double _thumbSize = 4.0;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      Size(_thumbSize, _thumbSize);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    bool isOnTop,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    Thumb thumb,
+  }) {
+    final Canvas canvas = context.canvas;
+    final Paint lightBluePaint = Paint()
+      ..color = Color(0xFFFE5F63).withOpacity(0.5);
+    canvas.drawCircle(center, 29 / 2, lightBluePaint);
+
+    final Paint white = Paint()..color = Colors.white;
+    canvas.drawCircle(center, 27 / 2, white);
+    final Paint cen = Paint()..color = Color(0xFFFE5F63);
+    canvas.drawCircle(center, 13 / 2, cen);
+  }
+}
+
+class MeetSliderThumbShape extends RoundSliderThumbShape {
+  static const double _thumbSize = 4.0;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
+    assert(context != null);
+    assert(center != null);
+    assert(enableAnimation != null);
+    assert(sliderTheme != null);
+    assert(sliderTheme.disabledThumbColor != null);
+    assert(sliderTheme.thumbColor != null);
+
+    final Canvas canvas = context.canvas;
+    final Tween<double> radiusTween = Tween<double>(
+      begin: enabledThumbRadius,
+      end: enabledThumbRadius,
+    );
+    final Paint lightBluePaint = Paint()
+      ..color = Color(0xFFFE5F63).withOpacity(0.5);
+    canvas.drawCircle(center, 29 / 2, lightBluePaint);
+    final Paint white = Paint()..color = Colors.white;
+    canvas.drawCircle(center, 26 / 2, white);
+    final Paint cen = Paint()..color = Color(0xFFFE5F63);
+    canvas.drawCircle(center, 13 / 2, cen);
   }
 }
 
@@ -69,7 +193,6 @@ class _MeetingChoiceState extends State<MeetingChoice>
   void initState() {
     super.initState();
     this.selected = widget.selected;
-    print("init state");
     initAnimation();
   }
 
@@ -85,7 +208,6 @@ class _MeetingChoiceState extends State<MeetingChoice>
   }
 
   void initAnimation() {
-    print("init animation");
     this.animationController = new AnimationController(
         duration: Duration(milliseconds: 400),
         value: (!selected) ? 1.0 : 0,
@@ -120,9 +242,7 @@ class _MeetingChoiceState extends State<MeetingChoice>
         curve: Curves.linearToEaseOut,
       ),
     ));
-
     animationController.addListener(() {
-      print("====change=");
       setState(() {});
     });
   }

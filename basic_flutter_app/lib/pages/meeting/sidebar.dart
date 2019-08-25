@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:we_rate_dogs/pages/meeting/slider.dart';
 
 import 'meeting_widgets.dart';
 
@@ -125,7 +124,7 @@ class _MeetRequirementSideBarState extends State<MeetRequirementSideBar> {
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: <Widget>[
                                       Icon(Icons.location_on,
-                                          size: 12, color: Colors.grey),
+                                          size: 15, color: Colors.grey),
                                       Text("15 km",
                                           style: TextStyle(
                                               color: Colors.black87,
@@ -137,7 +136,7 @@ class _MeetRequirementSideBarState extends State<MeetRequirementSideBar> {
                           SizedBox(
                             height: 1,
                           ),
-                          MySlider(),
+                          MeetSlider(),
                           SizedBox(
                             height: 30,
                           ),
@@ -149,7 +148,7 @@ class _MeetRequirementSideBarState extends State<MeetRequirementSideBar> {
                                 children: [
                                   Expanded(
                                     child: Container(
-                                      child: Text("Distance",
+                                      child: Text("Age",
                                           style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               fontSize: 20)),
@@ -160,9 +159,7 @@ class _MeetRequirementSideBarState extends State<MeetRequirementSideBar> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: <Widget>[
-                                      Icon(Icons.location_on,
-                                          size: 12, color: Colors.grey),
-                                      Text("15 km",
+                                      Text("18 - 23 years",
                                           style: TextStyle(
                                               color: Colors.black87,
                                               fontSize: 14))
@@ -173,7 +170,7 @@ class _MeetRequirementSideBarState extends State<MeetRequirementSideBar> {
                           SizedBox(
                             height: 1,
                           ),
-                          MySlider()
+                          MeetRangeSlider()
                         ])))),
       ],
     );
