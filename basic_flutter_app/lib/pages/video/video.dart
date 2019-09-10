@@ -15,9 +15,12 @@ class _VideoAppState extends State<VideoApp> {
     _controller = VideoPlayerController.network(
         'https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4')
       ..initialize().then((video) {
-        print("  initialized ");
+//        print("  initialized ");
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        setState(() {});
+        setState(() {
+
+
+        });
       });
   }
 

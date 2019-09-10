@@ -17,8 +17,6 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
   double ratio = 0.8;
   double currentPage = 0.0;
 
-
-
   @override
   void initState() {
     double fraction = 259 / 378;
@@ -39,6 +37,9 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
     });
     super.initState();
   }
+
+
+
 
   @override
   void dispose() {
@@ -305,6 +306,7 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
                   )),
               Container(
                 margin: EdgeInsets.only(top: 20, left: 42.5, right: 42.5),
+                padding: EdgeInsets.all(25),
                 height: 115,
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -315,6 +317,27 @@ class _FoodAppHomePageState extends State<FoodAppHomePage> {
                           offset: Offset(0, 4),
                           blurRadius: 6)
                     ]),
+                child: Row(children: <Widget>[
+                  Center(child: Image.asset("assets/food_app/cake.png")),
+                  SizedBox(width: 20),
+                  Column(children: [
+                    Text("Strawberry pie"),
+                    Text("Jane's recipe")
+                  ]),
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        decoration: BoxDecoration(
+                            color: Color(0xFFFFF5D1),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(15))),
+                        width: 30,
+                        height: 30,
+                        child: Center(child: Text("J")),
+                      ),
+                    ],
+                  )
+                ]),
               )
             ],
           )),

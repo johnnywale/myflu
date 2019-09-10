@@ -37,6 +37,7 @@ flutter:
     - assets/meeting/
     - assets/food_app/
     - assets/condo/
+    - assets/condo/facilities/
     - assets/audio/
 
   fonts:
@@ -164,11 +165,14 @@ dependencies:
   webview_flutter: ^0.3.10+3
   screenshot: ^0.1.1
   share_extend: "^1.0.9"
+  table_calendar: ^2.0.1
+  flutter_html: ^0.11.0
   qr_flutter: ^2.1.0+55
   flutter_rating_bar: ^1.3.0+1
   flutter_swiper: ^1.1.6
   badges: ^1.1.0
   audioplayers: 0.13.1
+  carousel_slider: ^1.3.0
 
 
   #   liquid_pull_to_refresh: ^1.1.1
