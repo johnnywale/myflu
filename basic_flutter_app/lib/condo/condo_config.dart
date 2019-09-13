@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:progress_hud/progress_hud.dart';
 import 'package:we_rate_dogs/condo/profile.dart';
 
 import 'about_us.dart';
 import 'booking_history.dart';
+import 'contact_us.dart';
 import 'event.dart';
 import 'facility.dart';
 import 'gallery.dart';
@@ -15,6 +17,9 @@ typedef MenuActionBuilder = Widget Function(
 final Color condoBackgroundColor = Color(0xfff9f7ea);
 final Color condorTextColor = Color(0xff9D661b);
 final Color condoActionbarColor = Color(0xffFBB040);
+final bool remote = true;
+
+final String condoBaseUrl = "https://www.micasa.com.sg";
 
 class CondoMenuItem {
   final IconData iconData;
@@ -76,6 +81,53 @@ CondoBotton(String text, {GestureTapCallback onTap}) {
   );
 }
 
+void loadingDismiss(BuildContext context) {
+  Navigator.pop(context);
+}
+
+void showLoading(BuildContext context) {
+  var hud = new ProgressHUD(
+    backgroundColor: Colors.transparent,
+    color: condorTextColor,
+    containerColor: condoBackgroundColor.withOpacity(0.9),
+    borderRadius: 20.0,
+    text: 'Loading...',
+  );
+
+  showGeneralDialog(
+    context: context,
+    pageBuilder: (BuildContext buildContext, Animation<double> animation,
+        Animation<double> secondaryAnimation) {
+      return Material(
+          shadowColor: Colors.transparent,
+          color: Colors.black,
+          elevation: 0,
+          type: MaterialType.transparency,
+          child: Center(
+              child: Container(
+            decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            height: 100,
+            width: 100,
+            child: hud,
+          )));
+    },
+    barrierDismissible: false,
+    transitionDuration: const Duration(milliseconds: 150),
+    transitionBuilder: (BuildContext context, Animation<double> animation,
+        Animation<double> secondaryAnimation, Widget child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+        ),
+        child: child,
+      );
+    },
+  );
+}
+
 final List<CondoMenuItem> CondoMenus = [
   CondoMenuItem(
       iconData: Icons.home,
@@ -132,7 +184,7 @@ final List<CondoMenuItem> CondoMenus = [
       iconData: Icons.phone_in_talk,
       title: "CONTACT US",
       builder: (key, value) {
-        return ProfilePage(key: key);
+        return CondoContactUsPage(key: key);
       }),
   CondoMenuItem(
       iconData: Icons.exit_to_app,

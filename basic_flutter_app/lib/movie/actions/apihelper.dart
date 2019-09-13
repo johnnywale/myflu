@@ -676,36 +676,36 @@ class ApiHelper {
   ///Discover movies by different types of data like average rating, number of votes, genres and certifications. You can get a valid list of certifications from the certifications list method.Discover also supports a nice list of sort options. See below for all of the available options.Please note, when using certification \ certification.lte you must also specify certification_country. These two parameters work together in order to filter the results. You can only filter results with the countries we have added to our certifications list.If you specify the region parameter, the regional release date will be used instead of the primary release date. The date returned will be the first date based on your query (ie. if a with_release_type is specified). It's important to note the order of the release types that are used. Specifying "2|3" would return the limited theatrical release date as opposed to "3|2" which would return the theatrical date.Also note that a number of filters support being comma (,) or pipe (|) separated. Comma's are treated like an AND and query while pipe's are an OR.
   static Future<VideoListModel> getMovieDiscover(
       {String lan,
-      String region,
-      String sortBy,
-      String certificationCountry,
-      String certification,
-      String certificationLte,
-      bool includeAdult = false,
-      bool includeVideo = false,
-      int page = 1,
-      int primaryReleaseYear,
-      String primaryReleaseDateGte,
-      String primaryReleaseDateLte,
-      String releaseDateGte,
-      String releaseDateLte,
-      int voteCountGte,
-      int voteCountLte,
-      double voteAverageGte,
-      double voteAverageLte,
-      String withCast,
-      String withCrew,
-      String withCompanies,
-      String withGenres,
-      String withKeywords,
-      String withPeople,
-      int year,
-      String withoutGenres,
-      int withRuntimeGte,
-      int withRuntimeLte,
-      int withReleaseType,
-      String withOriginalLanguage,
-      String withoutKeywords}) async {
+        String region,
+        String sortBy,
+        String certificationCountry,
+        String certification,
+        String certificationLte,
+        bool includeAdult = false,
+        bool includeVideo = false,
+        int page = 1,
+        int primaryReleaseYear,
+        String primaryReleaseDateGte,
+        String primaryReleaseDateLte,
+        String releaseDateGte,
+        String releaseDateLte,
+        int voteCountGte,
+        int voteCountLte,
+        double voteAverageGte,
+        double voteAverageLte,
+        String withCast,
+        String withCrew,
+        String withCompanies,
+        String withGenres,
+        String withKeywords,
+        String withPeople,
+        int year,
+        String withoutGenres,
+        int withRuntimeGte,
+        int withRuntimeLte,
+        int withReleaseType,
+        String withOriginalLanguage,
+        String withoutKeywords}) async {
     VideoListModel model;
     String param =
         '/discover/movie?api_key=$_apikey&page=$page&language=$language';
@@ -715,7 +715,7 @@ class ApiHelper {
         ? ''
         : '&certification_country=$certificationCountry';
     param +=
-        certificationLte == null ? '' : '&certification.lte=$certificationLte';
+    certificationLte == null ? '' : '&certification.lte=$certificationLte';
     param += includeAdult == null ? '' : '&include_adult=$includeAdult';
     param += includeVideo == null ? '' : '&include_video=$includeVideo';
     param += primaryReleaseYear == null
@@ -744,12 +744,12 @@ class ApiHelper {
     param += withRuntimeGte == null ? '' : '&with_runtime.gte=$withRuntimeGte';
     param += withRuntimeLte == null ? '' : '&with_runtime.lte=$withRuntimeLte';
     param +=
-        withReleaseType == null ? '' : '&with_release_type=$withReleaseType';
+    withReleaseType == null ? '' : '&with_release_type=$withReleaseType';
     param += withOriginalLanguage == null
         ? ''
         : '&with_original_language=$withOriginalLanguage';
     param +=
-        withoutKeywords == null ? '' : '&without_keywords=$withoutKeywords';
+    withoutKeywords == null ? '' : '&without_keywords=$withoutKeywords';
     var r = await httpGet(param);
     if (r != null) model = VideoListModel(r);
     return model;
@@ -757,15 +757,15 @@ class ApiHelper {
 
   static Future<VideoListModel> getTVDiscover(
       {String lan,
-      int page,
-      String sortBy,
-      String airDateGte,
-      String airDateLte,
-      String firstAirDateGte,
-      String firstAirDateLte,
-      String timezone = 'America/New_York',
-      String withGenres,
-      String withKeywords}) async {
+        int page,
+        String sortBy,
+        String airDateGte,
+        String airDateLte,
+        String firstAirDateGte,
+        String firstAirDateLte,
+        String timezone = 'America/New_York',
+        String withGenres,
+        String withKeywords}) async {
     VideoListModel model;
     String param =
         '/discover/tv?api_key=$_apikey&page=$page&timezone=$timezone&language=$language';
@@ -773,9 +773,9 @@ class ApiHelper {
     param += airDateGte == null ? '' : '&air_ate.gte=$airDateGte';
     param += airDateLte == null ? '' : '&air_ate.lte=$airDateLte';
     param +=
-        firstAirDateGte == null ? '' : '&first_air_ate.gte=$firstAirDateGte';
+    firstAirDateGte == null ? '' : '&first_air_ate.gte=$firstAirDateGte';
     param +=
-        firstAirDateLte == null ? '' : '&first_air_ate.lte=$firstAirDateLte';
+    firstAirDateLte == null ? '' : '&first_air_ate.lte=$firstAirDateLte';
     param += withGenres == null ? '' : '&with_genres=$withGenres';
     param += withKeywords == null ? '' : '&with_keywords=$withKeywords';
     var r = await httpGet(param);
@@ -786,11 +786,11 @@ class ApiHelper {
   ///Search for movies.
   static Future<VideoListModel> searchMovie(String keyword,
       {String lan,
-      int page = 1,
-      bool includeAdult = false,
-      String region,
-      int year,
-      int primaryReleaseYear}) async {
+        int page = 1,
+        bool includeAdult = false,
+        String region,
+        int year,
+        int primaryReleaseYear}) async {
     VideoListModel model;
     String param =
         '/search/movie?api_key=$_apikey&page=$page&include_adult=$includeAdult';
@@ -857,8 +857,8 @@ class ApiHelper {
 
   static Future<String> httpGet(String param,
       {bool cached = true,
-      cacheDuration = const Duration(days: 1),
-      maxStale = const Duration(days: 30)}) async {
+        cacheDuration = const Duration(days: 1),
+        maxStale = const Duration(days: 30)}) async {
     try {
       if (_appDocPath == null) {
         await getCookieDir();

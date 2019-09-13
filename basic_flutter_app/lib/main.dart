@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: 'TheGorgeousLogin',
       theme: new ThemeData(
+        fontFamily: "Product Sans",
         primarySwatch: Colors.blue,
       ),
       home: new LoginPage(),

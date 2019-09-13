@@ -22,7 +22,6 @@ class ChildUpdatable extends RenderObjectWidget {
 
   @override
   _LayoutBuilderElement createElement() {
-    print("create element is called");
     _LayoutBuilderElement element = _LayoutBuilderElement(this);
     if (this.notifier != null) {
       this.notifier.addListener(() {
@@ -34,7 +33,7 @@ class ChildUpdatable extends RenderObjectWidget {
 
   @override
   _RenderLayoutBuilder createRenderObject(BuildContext context) {
-    print("create render layout builder is called");
+    //  print("create render layout builder is called");
     return _RenderLayoutBuilder();
   }
 }

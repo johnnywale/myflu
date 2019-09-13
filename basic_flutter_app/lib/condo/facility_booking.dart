@@ -1,13 +1,13 @@
-//  Copyright (c) 2019 Aleksander Woźniak
-//  Licensed under Apache License v2.0
-
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:we_rate_dogs/condo/tc.dart';
 
 import 'condo_config.dart';
+import 'condo_service.dart';
+import 'lib/api/facility_api.dart';
+import 'lib/model/booking_session_status.dart';
+import 'lib/model/facility.dart';
+import 'swagger_date_time.dart';
 
 // Example holidays
 final Map<DateTime, List> _holidays = {
@@ -19,7 +19,8 @@ final Map<DateTime, List> _holidays = {
 };
 
 class FacilityBookingPage extends StatefulWidget {
-  FacilityBookingPage({Key key}) : super(key: key);
+  FacilityBookingPage({Key key, this.facility}) : super(key: key);
+  final Facility facility;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -27,26 +28,61 @@ class FacilityBookingPage extends StatefulWidget {
 
 class _MyHomePageState extends State<FacilityBookingPage>
     with TickerProviderStateMixin {
-  List _selectedEvents;
   AnimationController _animationController;
   CalendarController _calendarController;
-
-  getRandomColor() {
-    return Color.fromARGB(255, Random.secure().nextInt(255),
-        Random.secure().nextInt(255), Random.secure().nextInt(255));
-  }
+  CondoService _condoService;
+  FacilityApi facilityApi;
+  int groupId = 0;
+  bool agreed = false;
+  List<BookingSessionStatus> bookingSessionStatus = [];
+  SwaggerDateTime selectedDay;
+  Animation<double> opacity;
 
   @override
   void initState() {
     super.initState();
-    final _selectedDay = DateTime.now();
+
+    selectedDay = SwaggerDateTime.fromMillisecondsSinceEpoch(
+        DateTime
+            .now()
+            .add(Duration(days: 7))
+            .millisecondsSinceEpoch);
+    _condoService = new CondoService();
     _calendarController = CalendarController();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
+    opacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Interval(
+        0.50,
+        1.00,
+        curve: Curves.linear,
+      ),
+    ));
 
-    _animationController.forward();
+    _animationController.addListener(() {
+      setState(() {});
+    });
+
+    facilityApi = _condoService.jaguarApiGen.getFacilityApi();
+    loadBookingStatus();
+  }
+
+  void loadBookingStatus() {
+    facilityApi
+        .facilityFacilityIdSessionGet(widget.facility.id, selectedDay)
+        .then((e) {
+      print("found status $e");
+      bookingSessionStatus = e;
+      _animationController.forward(from: 0.0);
+
+//      setState(() {});
+    });
   }
 
   @override
@@ -57,21 +93,92 @@ class _MyHomePageState extends State<FacilityBookingPage>
   }
 
   void _onDaySelected(DateTime day, List events) {
-    print('CALLBACK: _onDaySelected');
-    setState(() {
-      _selectedEvents = events;
-    });
+    SwaggerDateTime newDay =
+    SwaggerDateTime.fromMillisecondsSinceEpoch(day.millisecondsSinceEpoch);
+    if (newDay != selectedDay) {
+      print("${selectedDay}");
+      selectedDay = newDay;
+      loadBookingStatus();
+    }
   }
 
-  void _onVisibleDaysChanged(
-      DateTime first, DateTime last, CalendarFormat format) {
+  void _onVisibleDaysChanged(DateTime first, DateTime last,
+      CalendarFormat format) {
     print('CALLBACK: _onVisibleDaysChanged');
   }
 
   void goTc() {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return new TcPage();
+      return new TcPage(facility: widget.facility);
     }));
+  }
+
+  Widget generateSlots() {
+    print("==gen==");
+    if (bookingSessionStatus.length == 0) {
+      return Container();
+    } else {
+      List<Widget> data = [];
+      data.add(Container(
+        height: 0.5,
+        margin: EdgeInsets.only(left: 20, right: 20),
+        color: Colors.black,
+      ));
+      data.add(SizedBox(height: 20));
+      data.add(Container(
+        padding: EdgeInsets.only(left: 5),
+        child: Text(
+          "Time",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ));
+      bookingSessionStatus.forEach((f) =>
+      {
+        if ("valid" == f.status.toLowerCase())
+          {
+            data.add(Row(children: [
+              Radio(
+                  value: f.id,
+                  groupValue: groupId,
+                  activeColor: condoActionbarColor,
+                  onChanged: (e) {
+                    groupId = f.id;
+                    setState(() {});
+                  }),
+              Text(
+                "${f.startTime} - ${f.endTime}",
+              )
+            ]))
+          }
+        else
+          {
+            data.add(Row(children: [
+              Radio(
+                value: f.id,
+                groupValue: groupId,
+                activeColor: condoActionbarColor,
+              ),
+              Text(
+                "${f.startTime} - ${f.endTime}",
+                style: TextStyle(color: Colors.grey),
+              )
+            ]))
+          }
+      });
+      print("opacity  ${opacity.value}");
+      return Opacity(
+        opacity: opacity.value,
+        child: Container(
+          padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: data,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -79,83 +186,97 @@ class _MyHomePageState extends State<FacilityBookingPage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: condoActionbarColor,
-        title: Text("====="),
+        title: Text("${widget.facility.name}"),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildTableCalendar(),
-          const SizedBox(height: 8.0),
-          Container(
-              padding: EdgeInsets.only(left: 20),
-              child: Wrap(
-                runAlignment: WrapAlignment.start,
-                alignment: WrapAlignment.start,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 0.0,
-                runSpacing: 8.0,
-                children: [
-                  Checkbox(value: true),
-                  Text("By clicking Submit you agree to the "),
-                  GestureDetector(
-                    onTap: () {
-                      goTc();
-                    },
-                    child: Text(
-                      "Terms",
-                      style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Color(0xff9d661b)),
-                    ),
-                  ),
-                  GestureDetector(
-                      onTap: () {
-                        goTc();
-                      },
-                      child: Text(" and",
-                          style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Color(0xff9d661b)))),
-                  GestureDetector(
-                      onTap: () {
-                        goTc();
-                      },
-                      child: Text(" Conditions",
-                          style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              color: Color(0xff9d661b))))
-                ],
-              )),
-          const SizedBox(height: 12.0),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: Container(
+//          color: Colors.green,
+          child: Column(
             mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Expanded(
-                flex: 5,
-                child: Container(
-                    padding: EdgeInsets.all(10),
-                    child: CondoBotton("SUBMIT", onTap: () {
-                      print("SUBMIT");
-                    })),
-              ),
-              Expanded(
-                  flex: 5,
-                  child: Container(
-                      padding: EdgeInsets.all(10),
-                      child: CondoBotton("CANCEL", onTap: () {
-                        print("CANCEL");
-                      })))
-            ],
-          )
+              _buildTableCalendar(),
+              generateSlots(),
+//              const SizedBox(height: 8.0),
+              Container(
+                  padding: EdgeInsets.only(left: 20),
+                  child: Wrap(
+                    runAlignment: WrapAlignment.start,
+                    alignment: WrapAlignment.start,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 0.0,
+                    runSpacing: 8.0,
+                    children: [
+                      Checkbox(
+                        value: agreed,
+                        activeColor: condoActionbarColor,
+                        onChanged: (checked) {
+                          this.agreed = checked;
+                          setState(() {});
+                        },
+                      ),
+                      Text("By clicking Submit you agree to the "),
+                      GestureDetector(
+                        onTap: () {
+                          goTc();
+                        },
+                        child: Text(
+                          "Terms",
+                          style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Color(0xff9d661b)),
+                        ),
+                      ),
+                      GestureDetector(
+                          onTap: () {
+                            goTc();
+                          },
+                          child: Text(" and",
+                              style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: Color(0xff9d661b)))),
+                      GestureDetector(
+                          onTap: () {
+                            goTc();
+                          },
+                          child: Text(" Conditions",
+                              style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: Color(0xff9d661b))))
+                    ],
+                  )),
+              const SizedBox(height: 12.0),
 
-          // _buildButtons(),
-          //   const SizedBox(height: 8.0),
-          //   Expanded(child: _buildEventList()),
-        ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    flex: 5,
+                    child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: CondoBotton("SUBMIT", onTap: () {
+                          print("SUBMIT");
+                        })),
+                  ),
+                  Expanded(
+                      flex: 5,
+                      child: Container(
+                          padding: EdgeInsets.all(10),
+                          child: CondoBotton("CANCEL", onTap: () {
+                            print("CANCEL");
+                          })))
+                ],
+              )
+
+              // _buildButtons(),
+              //   const SizedBox(height: 8.0),
+              //   Expanded(child: _buildEventList()),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -164,6 +285,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
   Widget _buildTableCalendar() {
     return TableCalendar(
       calendarController: _calendarController,
+      initialSelectedDay: selectedDay,
       //  events: _events,
       holidays: _holidays,
       startingDayOfWeek: StartingDayOfWeek.monday,
@@ -177,7 +299,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
         centerHeaderTitle: true,
         formatButtonVisible: false,
         formatButtonTextStyle:
-            TextStyle().copyWith(color: Colors.white, fontSize: 15.0),
+        TextStyle().copyWith(color: Colors.white, fontSize: 15.0),
         formatButtonDecoration: BoxDecoration(
           color: Colors.deepOrange[400],
           borderRadius: BorderRadius.circular(16.0),
@@ -185,195 +307,6 @@ class _MyHomePageState extends State<FacilityBookingPage>
       ),
       onDaySelected: _onDaySelected,
       onVisibleDaysChanged: _onVisibleDaysChanged,
-    );
-  }
-
-  // More advanced TableCalendar configuration (using Builders & Styles)
-  Widget _buildTableCalendarWithBuilders() {
-    return TableCalendar(
-      locale: 'pl_PL',
-      calendarController: _calendarController,
-//      events: _events,
-      holidays: _holidays,
-      initialCalendarFormat: CalendarFormat.month,
-      formatAnimation: FormatAnimation.slide,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      availableGestures: AvailableGestures.all,
-      availableCalendarFormats: const {
-        CalendarFormat.month: '',
-        CalendarFormat.week: '',
-      },
-      calendarStyle: CalendarStyle(
-        outsideDaysVisible: false,
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[800]),
-        holidayStyle: TextStyle().copyWith(color: Colors.blue[800]),
-      ),
-      daysOfWeekStyle: DaysOfWeekStyle(
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[600]),
-      ),
-      headerStyle: HeaderStyle(
-        centerHeaderTitle: true,
-        formatButtonVisible: false,
-      ),
-      builders: CalendarBuilders(
-        selectedDayBuilder: (context, date, _) {
-          return FadeTransition(
-            opacity: Tween(begin: 0.0, end: 1.0).animate(_animationController),
-            child: Container(
-              margin: const EdgeInsets.all(4.0),
-              padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-              color: Colors.deepOrange[300],
-              width: 100,
-              height: 100,
-              child: Text(
-                '${date.day}',
-                style: TextStyle().copyWith(fontSize: 16.0),
-              ),
-            ),
-          );
-        },
-        todayDayBuilder: (context, date, _) {
-          return Container(
-            margin: const EdgeInsets.all(4.0),
-            padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-            color: Colors.amber[400],
-            width: 100,
-            height: 100,
-            child: Text(
-              '${date.day}',
-              style: TextStyle().copyWith(fontSize: 16.0),
-            ),
-          );
-        },
-        markersBuilder: (context, date, events, holidays) {
-          final children = <Widget>[];
-
-          if (events.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: 1,
-                bottom: 1,
-                child: _buildEventsMarker(date, events),
-              ),
-            );
-          }
-
-          if (holidays.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: -2,
-                top: -2,
-                child: _buildHolidaysMarker(),
-              ),
-            );
-          }
-
-          return children;
-        },
-      ),
-      onDaySelected: (date, events) {
-        _onDaySelected(date, events);
-        _animationController.forward(from: 0.0);
-      },
-      onVisibleDaysChanged: _onVisibleDaysChanged,
-    );
-  }
-
-  Widget _buildEventsMarker(DateTime date, List events) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: _calendarController.isSelected(date)
-            ? Colors.brown[500]
-            : _calendarController.isToday(date)
-                ? Colors.brown[300]
-                : Colors.blue[400],
-      ),
-      width: 16.0,
-      height: 16.0,
-      child: Center(
-        child: Text(
-          '${events.length}',
-          style: TextStyle().copyWith(
-            color: Colors.white,
-            fontSize: 12.0,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHolidaysMarker() {
-    return Icon(
-      Icons.add_box,
-      size: 20.0,
-      color: Colors.blueGrey[800],
-    );
-  }
-
-  Widget _buildButtons() {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            RaisedButton(
-              child: Text('month'),
-              onPressed: () {
-                setState(() {
-                  _calendarController.setCalendarFormat(CalendarFormat.month);
-                });
-              },
-            ),
-            RaisedButton(
-              child: Text('2 weeks'),
-              onPressed: () {
-                setState(() {
-                  _calendarController
-                      .setCalendarFormat(CalendarFormat.twoWeeks);
-                });
-              },
-            ),
-            RaisedButton(
-              child: Text('week'),
-              onPressed: () {
-                setState(() {
-                  _calendarController.setCalendarFormat(CalendarFormat.week);
-                });
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 8.0),
-        RaisedButton(
-          child: Text('setDay 10-07-2019'),
-          onPressed: () {
-            _calendarController.setSelectedDay(DateTime(2019, 7, 10),
-                runCallback: true);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEventList() {
-    return ListView(
-      children: _selectedEvents
-          .map((event) => Container(
-                decoration: BoxDecoration(
-                  border: Border.all(width: 0.8),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: ListTile(
-                  title: Text(event.toString()),
-                  onTap: () => print('$event tapped!'),
-                ),
-              ))
-          .toList(),
     );
   }
 }

@@ -23,7 +23,6 @@ class _WelcomePageState extends State<CondoWelcomePage> {
     Widget widget = widgets[i];
     if (widget == null) {
       ValueChanged<int> val = push;
-
       widget = CondoMenus.asMap()[i].builder(GlobalKey(), val);
       widgets[i] = widget;
     }
@@ -31,13 +30,16 @@ class _WelcomePageState extends State<CondoWelcomePage> {
   }
 
   void pushFromMenu(int i) {
+    if (previous == i) {
+      Navigator.of(context).pop();
+      return;
+    }
     push(i);
     Navigator.of(context).pop();
   }
 
   void push(int i) {
     if (previous == i) {
-      Navigator.of(context).pop();
       return;
     }
     Widget widget = getWidget(i);
@@ -47,7 +49,7 @@ class _WelcomePageState extends State<CondoWelcomePage> {
       Fragment state2 = globalKey.currentState as Fragment;
       state2.play();
     }
-    print("Title");
+    print("Tit |  fdaf  le");
     title.currentState.changeText(CondoMenus.asMap()[i].title);
     previous = i;
   }

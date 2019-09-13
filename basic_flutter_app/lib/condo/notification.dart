@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:progress_hud/progress_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import 'base_condo_page.dart';
 import 'child_updatable.dart';
 import 'condo_config.dart';
+import 'lib/api/article_api.dart';
+import 'lib/model/article.dart';
+import 'lib/model/paged_article.dart';
 
 class NotificationPage extends StatefulWidget {
   @override
@@ -12,135 +18,52 @@ class NotificationPage extends StatefulWidget {
   const NotificationPage({Key key}) : super(key: key);
 }
 
-class NotificationPageState extends State<NotificationPage>
-    with TickerProviderStateMixin
-    implements Fragment {
-  int i = 0;
-  AnimationController _controller;
-  ScrollController _scrollController;
-
-  Animation<Offset> position;
-  Animation<double> resize;
-
-  void play() {
-    _controller.forward(from: 0.0);
-  }
-
-  void _onRefresh() async {
-    await Future.delayed(Duration(milliseconds: 1000));
-    _refreshController.refreshCompleted();
-  }
+class NotificationPageState
+    extends BaseCondoPageState<NotificationPage, Article> {
+  ArticleApi articleApi;
 
   @override
   void initState() {
     super.initState();
 
-    _scrollController = ScrollController();
-
-    this._controller = new AnimationController(
-        vsync: this, duration: Duration(milliseconds: 400));
-    position = Tween(begin: Offset(1, 0), end: Offset(0, 0))
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
-    resize = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Interval(
-        0.50,
-        1.00,
-        curve: Curves.linear,
-      ),
-    ));
-
-    _controller.addListener(() {
-      setState(() {});
-    });
-    _controller.forward(from: 0.0);
-    _refreshController = RefreshController(initialRefresh: false);
-  }
-
-  RefreshController _refreshController;
-
-  void _onLoading() async {
-    var hud = new ProgressHUD(
-      backgroundColor: Colors.transparent,
-      color: Colors.grey,
-      containerColor: Colors.grey[50].withOpacity(0.9),
-      borderRadius: 20.0,
-      text: 'Loading...',
-    );
-
-    showGeneralDialog(
-      context: context,
-      pageBuilder: (BuildContext buildContext, Animation<double> animation,
-          Animation<double> secondaryAnimation) {
-        return Material(
-            shadowColor: Colors.transparent,
-            color: Colors.black,
-            elevation: 0,
-            type: MaterialType.transparency,
-            child: Center(
-                child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-              height: 100,
-              width: 100,
-              child: hud,
-            )));
-      },
-      barrierDismissible: false,
-      transitionDuration: const Duration(milliseconds: 150),
-      transitionBuilder: (BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation, Widget child) {
-        return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
-          child: child,
-        );
-      },
-    );
-    await Future.delayed(Duration(milliseconds: 300));
-    //  total = total + batch;
-    _refreshController.loadComplete();
-    Navigator.pop(context);
-    if (mounted) setState(() {});
-  }
-
-  Widget generate() {
-    return SmartRefresher(
-        onRefresh: _onRefresh,
-        onLoading: _onLoading,
-        controller: _refreshController,
-        enablePullDown: true,
-        enablePullUp: true,
-        header: WaterDropMaterialHeader(
-          color: Colors.white,
-          backgroundColor: Color(0xFF21BFBD),
-        ),
-        child: ListView.builder(
-            controller: _scrollController,
-            itemCount: 20,
-            itemBuilder: (context, index) {
-              if (index < 1) {
-                return Container(
-                  height: 20,
-                  color: Colors.transparent,
-                );
-              }
-              return Container(
-                height: 20,
-                color: Colors.yellow,
-              );
-            }));
+    articleApi = condoService.jaguarApiGen.getArticleApi();
   }
 
   Color canceledColor = Color(0xffcccccc);
 
-  Widget buildFacilityBooking() {
+  Widget buildFacilityBooking() {}
+
+//  @override
+//  Widget build(BuildContext context) {
+//    return SlideTransition(
+//        position: position,
+//        child: ScaleTransition(
+//            scale: resize,
+//            child: Material(
+//                color: condoBackgroundColor,
+//                elevation: 16,
+//                child: Container(
+//                    height: double.infinity,
+//                    width: MediaQuery.of(context).size.width,
+//                    child: SingleChildScrollView(
+//                      child: buildFacilityBooking(),
+//                    )))));
+//  }
+
+  Future<List<Article>> articleGet() {
+    Future<PagedArticle> future =
+        articleApi.articleGet(1, 999, null, null, null);
+    var completer = new Completer<List<Article>>.sync();
+    future.then((onValue) {
+      completer.complete(onValue.data);
+    }).catchError((onError) {
+      completer.completeError(onError);
+    });
+    return completer.future;
+  }
+
+  @override
+  Widget buildItem(Article facility) {
     return Container(
       width: MediaQuery.of(context).size.width,
       child: InkWell(
@@ -169,11 +92,15 @@ class NotificationPageState extends State<NotificationPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        Text(
-                          "1 DAY DESARU - NATURE TOUR-",
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.black,
+                        Container(
+                          width: 300,
+                          child: Text(
+                            facility.title,
+                            maxLines: 2,
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
                         SizedBox(height: 10),
@@ -201,19 +128,5 @@ class NotificationPageState extends State<NotificationPage>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-        position: position,
-        child: ScaleTransition(
-            scale: resize,
-            child: Material(
-                color: condoBackgroundColor,
-                elevation: 16,
-                child: Container(
-                    height: double.infinity,
-                    width: MediaQuery.of(context).size.width,
-                    child: SingleChildScrollView(
-                      child: buildFacilityBooking(),
-                    )))));
-  }
+  get loadAll => articleGet;
 }
