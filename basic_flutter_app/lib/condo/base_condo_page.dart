@@ -28,6 +28,9 @@ abstract class BaseCondoPageState<G extends StatefulWidget, T> extends State<G>
   @override
   void initState() {
     super.initState();
+
+    print("init ${this.widget.runtimeType}");
+
     condoService = CondoService();
     _scrollController = ScrollController();
     this._controller = new AnimationController(

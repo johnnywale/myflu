@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:we_rate_dogs/condo/tc.dart';
+import 'package:we_rate_dogs/condo/toast_notification.dart';
 
 import 'condo_config.dart';
 import 'condo_service.dart';
 import 'lib/api/facility_api.dart';
 import 'lib/model/booking_session_status.dart';
 import 'lib/model/facility.dart';
+import 'lib/model/facility_booking_create.dart';
 import 'swagger_date_time.dart';
 
 // Example holidays
@@ -43,10 +45,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
     super.initState();
 
     selectedDay = SwaggerDateTime.fromMillisecondsSinceEpoch(
-        DateTime
-            .now()
-            .add(Duration(days: 7))
-            .millisecondsSinceEpoch);
+        DateTime.now().add(Duration(days: 7)).millisecondsSinceEpoch);
     _condoService = new CondoService();
     _calendarController = CalendarController();
     _animationController = AnimationController(
@@ -77,11 +76,9 @@ class _MyHomePageState extends State<FacilityBookingPage>
     facilityApi
         .facilityFacilityIdSessionGet(widget.facility.id, selectedDay)
         .then((e) {
-      print("found status $e");
       bookingSessionStatus = e;
+      groupId = 0;
       _animationController.forward(from: 0.0);
-
-//      setState(() {});
     });
   }
 
@@ -92,18 +89,37 @@ class _MyHomePageState extends State<FacilityBookingPage>
     super.dispose();
   }
 
+  GlobalKey<ScaffoldState> key = GlobalKey();
+
+  void showInSnackBar(ToastNotification value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    key.currentState?.removeCurrentSnackBar();
+    key.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        value.msg,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: Colors.red,
+      duration: Duration(seconds: 3),
+    ));
+  }
+
   void _onDaySelected(DateTime day, List events) {
     SwaggerDateTime newDay =
-    SwaggerDateTime.fromMillisecondsSinceEpoch(day.millisecondsSinceEpoch);
+        SwaggerDateTime.fromMillisecondsSinceEpoch(day.millisecondsSinceEpoch);
     if (newDay != selectedDay) {
-      print("${selectedDay}");
+      //print("${selectedDay}");
       selectedDay = newDay;
       loadBookingStatus();
     }
   }
 
-  void _onVisibleDaysChanged(DateTime first, DateTime last,
-      CalendarFormat format) {
+  void _onVisibleDaysChanged(
+      DateTime first, DateTime last, CalendarFormat format) {
     print('CALLBACK: _onVisibleDaysChanged');
   }
 
@@ -114,7 +130,6 @@ class _MyHomePageState extends State<FacilityBookingPage>
   }
 
   Widget generateSlots() {
-    print("==gen==");
     if (bookingSessionStatus.length == 0) {
       return Container();
     } else {
@@ -132,40 +147,38 @@ class _MyHomePageState extends State<FacilityBookingPage>
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ));
-      bookingSessionStatus.forEach((f) =>
-      {
-        if ("valid" == f.status.toLowerCase())
-          {
-            data.add(Row(children: [
-              Radio(
-                  value: f.id,
-                  groupValue: groupId,
-                  activeColor: condoActionbarColor,
-                  onChanged: (e) {
-                    groupId = f.id;
-                    setState(() {});
-                  }),
-              Text(
-                "${f.startTime} - ${f.endTime}",
-              )
-            ]))
-          }
-        else
-          {
-            data.add(Row(children: [
-              Radio(
-                value: f.id,
-                groupValue: groupId,
-                activeColor: condoActionbarColor,
-              ),
-              Text(
-                "${f.startTime} - ${f.endTime}",
-                style: TextStyle(color: Colors.grey),
-              )
-            ]))
-          }
-      });
-      print("opacity  ${opacity.value}");
+      bookingSessionStatus.forEach((f) => {
+            if ("valid" == f.status.toLowerCase())
+              {
+                data.add(Row(children: [
+                  Radio(
+                      value: f.id,
+                      groupValue: groupId,
+                      activeColor: condoActionbarColor,
+                      onChanged: (e) {
+                        groupId = f.id;
+                        setState(() {});
+                      }),
+                  Text(
+                    "${f.startTime} - ${f.endTime}",
+                  )
+                ]))
+              }
+            else
+              {
+                data.add(Row(children: [
+                  Radio(
+                    value: f.id,
+                    groupValue: groupId,
+                    activeColor: condoActionbarColor,
+                  ),
+                  Text(
+                    "${f.startTime} - ${f.endTime}",
+                    style: TextStyle(color: Colors.grey),
+                  )
+                ]))
+              }
+          });
       return Opacity(
         opacity: opacity.value,
         child: Container(
@@ -184,6 +197,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: key,
       appBar: AppBar(
         backgroundColor: condoActionbarColor,
         title: Text("${widget.facility.name}"),
@@ -258,7 +272,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
                     child: Container(
                         padding: EdgeInsets.all(10),
                         child: CondoBotton("SUBMIT", onTap: () {
-                          print("SUBMIT");
+                          submitBooking();
                         })),
                   ),
                   Expanded(
@@ -266,7 +280,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
                       child: Container(
                           padding: EdgeInsets.all(10),
                           child: CondoBotton("CANCEL", onTap: () {
-                            print("CANCEL");
+                            Navigator.of(context).pop();
                           })))
                 ],
               )
@@ -279,6 +293,29 @@ class _MyHomePageState extends State<FacilityBookingPage>
         ),
       ),
     );
+  }
+
+  void submitBooking() {
+    if (groupId == 0) {
+      showInSnackBar(ToastNotification(
+          msg: "Please select a slot", msgType: MsgType.WARN));
+      return;
+    }
+    if (agreed == false) {
+      showInSnackBar(
+          ToastNotification(msg: "Please agree", msgType: MsgType.WARN));
+    }
+    facilityApi
+        .facilitySessionSessionIdPost(
+            groupId,
+            FacilityBookingCreate(
+              day: selectedDay,
+            ))
+        .then((onValue) {
+      print("booked");
+    }).catchError((onError) {
+      print("error");
+    });
   }
 
   // Simple TableCalendar configuration (using Styles)
@@ -299,7 +336,7 @@ class _MyHomePageState extends State<FacilityBookingPage>
         centerHeaderTitle: true,
         formatButtonVisible: false,
         formatButtonTextStyle:
-        TextStyle().copyWith(color: Colors.white, fontSize: 15.0),
+            TextStyle().copyWith(color: Colors.white, fontSize: 15.0),
         formatButtonDecoration: BoxDecoration(
           color: Colors.deepOrange[400],
           borderRadius: BorderRadius.circular(16.0),

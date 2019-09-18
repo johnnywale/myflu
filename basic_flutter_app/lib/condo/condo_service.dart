@@ -13,6 +13,8 @@ class CondoService {
   final ValueNotifier<Optional<Member>> notifier =
       ValueNotifier(Optional.empty());
 
+  final ChangeNotifier facilityBookingNotifier = ChangeNotifier();
+
   factory CondoService() {
     return _singleton;
   }

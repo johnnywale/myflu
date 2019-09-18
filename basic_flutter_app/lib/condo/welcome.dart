@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:we_rate_dogs/condo/stateful_text.dart';
+import 'package:we_rate_dogs/condo/toast_notification.dart';
 
 import 'child_updatable.dart';
 import 'condo_config.dart';
@@ -81,6 +82,37 @@ class _WelcomePageState extends State<CondoWelcomePage> {
     return result;
   }
 
+  Color getColor(ToastNotification notification) {
+    switch (notification.msgType) {
+      case MsgType.ERROR:
+        return Colors.red;
+        break;
+      case MsgType.WARN:
+        return Colors.orange;
+        break;
+      case MsgType.INFO:
+        return Colors.blue;
+        break;
+    }
+  }
+
+  void showInSnackBar(ToastNotification value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    key.currentState?.removeCurrentSnackBar();
+    key.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        value.msg,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: getColor(value),
+      duration: Duration(seconds: 3),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     print("build welcome");
@@ -106,19 +138,30 @@ class _WelcomePageState extends State<CondoWelcomePage> {
           key: title,
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          Opacity(
-            opacity: 1.0,
-            child: ChildUpdatable(
-              keepFirst: true,
-              notifier: firstNotify,
-              builder: (con, gc) {
-                return getWidget(0);
-              },
-            ),
-          )
-        ],
+      body: NotificationListener(
+        onNotification: (notification) {
+          switch (notification.runtimeType) {
+            case ToastNotification:
+              showInSnackBar(notification);
+              break;
+          }
+          print("receive === ${notification}");
+          return false;
+        },
+        child: Stack(
+          children: <Widget>[
+            Opacity(
+              opacity: 1.0,
+              child: ChildUpdatable(
+                keepFirst: true,
+                notifier: firstNotify,
+                builder: (con, gc) {
+                  return getWidget(0);
+                },
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
